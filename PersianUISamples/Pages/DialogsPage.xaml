@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.DialogsPage"
+             x:DataType="vm:DialogsGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="IDialogService" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding ResultTitle}" Hint="{Binding ResultHint}">
+                <Label Text="{Binding LastResult}"
+                       FontFamily="IranianSans" FontSize="14"
+                       TextColor="{StaticResource PdtAccent}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding ButtonsTitle}" Hint="{Binding ButtonsHint}">
+                <VerticalStackLayout Spacing="10">
+                    <pui:ButtonView Text="Alert" Icon="&#xf06a;"
+                                    Command="{Binding AlertCommand}"
+                                    BtnBgColor="{StaticResource PdtAccent}"
+                                    TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+                    <pui:ButtonView Text="Confirm" Icon="&#xf059;"
+                                    Command="{Binding ConfirmCommand}"
+                                    BtnBgColor="#5B8DEF"
+                                    TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+                    <pui:ButtonView Text="Prompt" Icon="&#xf044;"
+                                    Command="{Binding PromptCommand}"
+                                    BtnBgColor="#7B61FF"
+                                    TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+                </VerticalStackLayout>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding ToastTitle}" Hint="{Binding ToastHint}">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <pui:ButtonView Grid.Column="0" Text="Toast" Icon="&#xf0a1;"
+                                    Command="{Binding ToastCommand}"
+                                    BtnBgColor="#2EA043"
+                                    TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+                    <pui:ButtonView Grid.Column="1" Text="Snackbar" Icon="&#xf0f3;"
+                                    Command="{Binding SnackbarCommand}"
+                                    BtnBgColor="#E67E22"
+                                    TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+                </Grid>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding CustomTitle}" Hint="{Binding CustomHint}">
+                <pui:ButtonView Text="{Binding CustomButton}" Icon="&#xf1c0;"
+                                Command="{Binding CustomCommand}"
+                                BtnBgColor="#C0392B"
+                                TextColor="White" IconColor="White" CornerRadius="10" HeightRequest="46"/>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

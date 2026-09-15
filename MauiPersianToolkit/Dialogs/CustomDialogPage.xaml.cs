@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using MauiPersianToolkit.Controls;
 using MauiPersianToolkit.Models;
 
 namespace MauiPersianToolkit.Dialogs;
@@ -53,21 +53,4 @@ public partial class CustomDialogPage : Popup
         if (_config.CloseAfterAccept)
             await this.CloseAsync();
     }
-
-    //private void MeasureText()
-    //{
-    //    locEditor.MaximumWidthRequest = container.MaximumWidthRequest;
-    //    locEditor.Text = _config.Message;
-    //    locEditor.FontFamily = "IranianSans";
-    //    var locSize = locEditor.Handler.GetDesiredSize(double.PositiveInfinity, double.PositiveInfinity);
-    //    var content = _config.Content.Measure(double.PositiveInfinity, double.PositiveInfinity);
-    //    scrollView.HeightRequest = locSize.Height + content.Minimum.Height + 65;
-    //    container.Children.Remove(locEditor);
-    //    grdBody.HeightRequest = locSize.Height + content.Minimum.Height + 190;
-    //}
-
-    //private void Popup_HandlerChanged(object sender, EventArgs e)
-    //{
-    //    MeasureText();
-    //}
 }

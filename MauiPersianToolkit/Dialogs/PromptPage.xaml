@@ -1,36 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<mpt:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:mpt="http://schemas.mauipersiantoolkit.com/2026/toolkit"
                xmlns:uc="clr-namespace:MauiPersianToolkit.Controls"
                xmlns:models="clr-namespace:MauiPersianToolkit.Models"
-               x:Class="MauiPersianToolkit.Dialogs.PromptPage" BackgroundColor="Transparent" HorizontalOptions="Fill" x:DataType="models:PromptConfig">
+               x:Class="MauiPersianToolkit.Dialogs.PromptPage" BackgroundColor="Transparent"
+               HorizontalOptions="Fill" VerticalOptions="Center" x:DataType="models:PromptConfig">
 
-    <!-- Content -->
     <Grid VerticalOptions="Center" HorizontalOptions="Fill" FlowDirection="RightToLeft" x:Name="container">
         <Grid Padding="20" HorizontalOptions="Fill">
             <Border HorizontalOptions="Fill" Padding="0" Margin="0,32,0,0" Background="{Binding BackgroundColor}">
                 <Border.StrokeShape>
-                    <RoundRectangle Fill="{Binding BackgroundColor}" CornerRadius="7" StrokeThickness="1" StrokeLineJoin="Round" Stroke="Gainsboro"/>
+                    <RoundRectangle Fill="{Binding BackgroundColor}" CornerRadius="7" StrokeThickness="1"
+                                    StrokeLineJoin="Round"
+                                    Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"/>
                 </Border.StrokeShape>
                 <Grid RowDefinitions="95,Auto,45" ColumnDefinitions="100*">
-                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding Title,Mode=OneWay}" TextColor="Black" FontSize="Title" HorizontalOptions="Fill" VerticalOptions="Center" FontFamily="IranianSans" LineBreakMode="NoWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Margin="20,45,20,0" x:Name="lblTitle"/>
+                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding Title,Mode=OneWay}"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                           FontSize="Title" HorizontalOptions="Fill" VerticalOptions="Center" FontFamily="IranianSans"
+                           LineBreakMode="NoWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           Margin="20,45,20,0" x:Name="lblTitle"/>
                     <ScrollView Grid.Row="1" x:Name="scrollView">
                         <VerticalStackLayout Padding="15,5" HorizontalOptions="Fill" VerticalOptions="Fill">
-                            <Label Text="{Binding Message}" FontSize="Body" Padding="20,0,20,10" LineHeight="1.25" x:Name="lblMessage" FontFamily="IranianSans" TextColor="#666" LineBreakMode="WordWrap" HorizontalTextAlignment="Justify" />
+                            <Label Text="{Binding Message}" FontSize="Body" Padding="20,0,20,10" LineHeight="1.25"
+                                   x:Name="lblMessage" FontFamily="IranianSans"
+                                   TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"
+                                   LineBreakMode="WordWrap" HorizontalTextAlignment="Justify" />
 
-                            <uc:EntryView Text="{Binding DefaultValue}" PlaceHolder="{Binding Placeholder}" Margin="10" Icon="{Binding FontIcon}" AppendText="{Binding AppendText}"/>
+                            <uc:EntryView Text="{Binding DefaultValue}" PlaceHolder="{Binding Placeholder}"
+                                          Margin="10" Icon="{Binding FontIcon}" AppendText="{Binding AppendText}"/>
                         </VerticalStackLayout>
                     </ScrollView>
-                    <Grid BackgroundColor="#f5f5f5" VerticalOptions="End" RowDefinitions="45" ColumnDefinitions="50*,50*" Margin="0,0,0,0" Grid.Row="2">
-                        <uc:ButtonView Text="{Binding AcceptText}" BtnMargin="0" TextColor="#1f883d" CornerRadius="0" BtnBgColor="#f5f5f5" Icon="{Binding AcceptFontIcon}" IconColor="#1f883d" Clicked="btnAccept_Clicked" Grid.Column="0"/>
-                        <uc:ButtonView Text="{Binding CancelText}" TextColor="OrangeRed" CornerRadius="0" BtnMargin="0" Icon="{Binding CancelFontIcon}" BtnBgColor="#f5f5f5" IconColor="OrangeRed" Clicked="btnCancel_Clicked" Grid.Column="1"/>
+                    <Grid BackgroundColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                          VerticalOptions="End" RowDefinitions="45" ColumnDefinitions="50*,50*" Grid.Row="2">
+                        <uc:ButtonView Text="{Binding AcceptText}" BtnMargin="0" TextColor="{StaticResource PdtAccept}"
+                                       CornerRadius="0"
+                                       BtnBgColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                                       Icon="{Binding AcceptFontIcon}" IconColor="{StaticResource PdtAccept}"
+                                       Clicked="btnAccept_Clicked" Grid.Column="0"/>
+                        <uc:ButtonView Text="{Binding CancelText}" TextColor="{StaticResource PdtCancel}" CornerRadius="0"
+                                       BtnMargin="0" Icon="{Binding CancelFontIcon}"
+                                       BtnBgColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                                       IconColor="{StaticResource PdtCancel}" Clicked="btnCancel_Clicked" Grid.Column="1"/>
                     </Grid>
                 </Grid>
             </Border>
-            <Frame Padding="0" CornerRadius="100" BorderColor="Transparent" WidthRequest="72" HeightRequest="72" VerticalOptions="Start" HorizontalOptions="Center">
-                <Button WidthRequest="72" HeightRequest="72" FontSize="32" TextColor="White" Text="{Binding FontIcon}" BorderWidth="3" InputTransparent="True" BorderColor="{Binding BackgroundColor}" Padding="0" CornerRadius="100" BackgroundColor="{Binding DialogColor}" FontFamily="FontAwesome"/>
+            <Frame Padding="0" CornerRadius="100" BorderColor="Transparent" WidthRequest="72" HeightRequest="72"
+                   VerticalOptions="Start" HorizontalOptions="Center">
+                <Button WidthRequest="72" HeightRequest="72" FontSize="32" TextColor="White" Text="{Binding FontIcon}"
+                        BorderWidth="3" InputTransparent="True" BorderColor="{Binding BackgroundColor}" Padding="0"
+                        CornerRadius="100" BackgroundColor="{Binding DialogColor}" FontFamily="FontAwesome"/>
             </Frame>
         </Grid>
     </Grid>
-</toolkit:Popup>
+</mpt:Popup>

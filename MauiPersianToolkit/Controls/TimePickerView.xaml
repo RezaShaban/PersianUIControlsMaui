@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<controls:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
+                xmlns:mpt="http://schemas.mauipersiantoolkit.com/2026/toolkit"
+                xmlns:models="clr-namespace:MauiPersianToolkit.Models"
+                x:Class="MauiPersianToolkit.Controls.TimePickerView"
+                x:Name="timeSheet"
+                VerticalOptions="End"
+                HorizontalOptions="Fill"
+                CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <Border StrokeThickness="0"
+            BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}"
+            Padding="0"
+            HorizontalOptions="Fill">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="20,20,0,0"/>
+        </Border.StrokeShape>
+        <Border.Shadow>
+            <Shadow Brush="#40000000" Offset="0,-4" Radius="16" Opacity="0.2"/>
+        </Border.Shadow>
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="0" Padding="0,8,0,0">
+
+            <BoxView Grid.Row="0" WidthRequest="40" HeightRequest="4" CornerRadius="2"
+                     HorizontalOptions="Center" Margin="0,4,0,8"
+                     Color="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"/>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="20,0,16,8">
+                <Label Text="{Binding Title, Source={x:Reference timeSheet}}"
+                       FontFamily="IranianSans" FontAttributes="Bold" FontSize="18"
+                       VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                <Button Grid.Column="1" Text="{mpt:Localize Now}"
+                        FontFamily="IranianSans" FontSize="13" Padding="12,6"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource PdtAccent}"
+                        Clicked="OnNowClicked"/>
+            </Grid>
+
+            <Border Grid.Row="2" Margin="20,4,20,12" Padding="16,14" StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14"/>
+                </Border.StrokeShape>
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="4" VerticalOptions="Center">
+                    <Label x:Name="lblHour" FontFamily="IranianSans" FontSize="36" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" WidthRequest="64"
+                           TextColor="{StaticResource PdtAccent}"/>
+                    <Label Text=":" FontFamily="IranianSans" FontSize="36" FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                    <Label x:Name="lblMinute" FontFamily="IranianSans" FontSize="36" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" WidthRequest="64"
+                           TextColor="{StaticResource PdtAccent}"/>
+                    <Label x:Name="lblSecondSep" Text=":" FontFamily="IranianSans" FontSize="36" FontAttributes="Bold"
+                           VerticalOptions="Center" IsVisible="False"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                    <Label x:Name="lblSecond" FontFamily="IranianSans" FontSize="36" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" WidthRequest="64" IsVisible="False"
+                           TextColor="{StaticResource PdtAccent}"/>
+                    <Label x:Name="lblMeridiem" FontFamily="IranianSans" FontSize="16" Margin="10,0,0,0"
+                           VerticalOptions="Center" IsVisible="False"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Labels above wheels so highlight band == ScrollView geometric center -->
+            <Grid Grid.Row="3" x:Name="labelsRow" ColumnDefinitions="*,*,*" ColumnSpacing="8"
+                  Margin="16,0,16,4">
+                <Label Text="{mpt:Localize Hour}" FontSize="11" FontFamily="IranianSans"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                <Label Grid.Column="1" Text="{mpt:Localize Minute}" FontSize="11" FontFamily="IranianSans"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                <Label Grid.Column="2" x:Name="secondLabel" Text="{mpt:Localize Second}" FontSize="11"
+                       FontFamily="IranianSans" HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+            </Grid>
+
+            <Grid Grid.Row="4" x:Name="wheelsGrid" ColumnDefinitions="*,*,*" ColumnSpacing="8"
+                  HeightRequest="176" Margin="16,0,16,8">
+
+                <Border x:Name="selectionBand" Grid.ColumnSpan="3" HeightRequest="44" VerticalOptions="Center"
+                        StrokeThickness="0" InputTransparent="True"
+                        BackgroundColor="{AppThemeBinding Light=#145B2BDF, Dark=#335B2BDF}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10"/>
+                    </Border.StrokeShape>
+                </Border>
+
+                <ScrollView x:Name="hourScroll" Grid.Column="0"
+                            Orientation="Vertical" HeightRequest="176"
+                            VerticalScrollBarVisibility="Never"
+                            HorizontalScrollBarVisibility="Never"
+                            Scrolled="OnWheelScrolled">
+                    <VerticalStackLayout x:Name="hourStack" Spacing="0" Padding="0,66,0,66"/>
+                </ScrollView>
+
+                <ScrollView x:Name="minuteScroll" Grid.Column="1"
+                            Orientation="Vertical" HeightRequest="176"
+                            VerticalScrollBarVisibility="Never"
+                            HorizontalScrollBarVisibility="Never"
+                            Scrolled="OnWheelScrolled">
+                    <VerticalStackLayout x:Name="minuteStack" Spacing="0" Padding="0,66,0,66"/>
+                </ScrollView>
+
+                <ScrollView x:Name="secondScroll" Grid.Column="2"
+                            Orientation="Vertical" HeightRequest="176"
+                            VerticalScrollBarVisibility="Never"
+                            HorizontalScrollBarVisibility="Never"
+                            Scrolled="OnWheelScrolled">
+                    <VerticalStackLayout x:Name="secondStack" Spacing="0" Padding="0,66,0,66"/>
+                </ScrollView>
+            </Grid>
+
+            <HorizontalStackLayout Grid.Row="5" x:Name="meridiemBar" IsVisible="False"
+                                   HorizontalOptions="Center" Spacing="8" Margin="0,4,0,8">
+                <Button x:Name="btnAm" Text="{mpt:Localize Am}" FontFamily="IranianSans"
+                        Padding="18,8" CornerRadius="20" Clicked="OnAmClicked"/>
+                <Button x:Name="btnPm" Text="{mpt:Localize Pm}" FontFamily="IranianSans"
+                        Padding="18,8" CornerRadius="20" Clicked="OnPmClicked"/>
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="6" ColumnDefinitions="*,*" ColumnSpacing="12"
+                  Padding="16,8,16,16"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}">
+                <Button Text="{Binding CancelText, Source={x:Reference timeSheet}}"
+                        FontFamily="IranianSans" BackgroundColor="Transparent"
+                        TextColor="{StaticResource PdtCancel}" Clicked="OnCancelClicked"/>
+                <Button Grid.Column="1"
+                        Text="{Binding AcceptText, Source={x:Reference timeSheet}}"
+                        FontFamily="IranianSans" BackgroundColor="Transparent"
+                        TextColor="{StaticResource PdtAccept}" Clicked="OnAcceptClicked"/>
+            </Grid>
+        </Grid>
+    </Border>
+</controls:Popup>

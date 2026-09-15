@@ -2,8 +2,19 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiPersianToolkit.Controls.TreeView"
-             xmlns:conv="clr-namespace:MauiPersianToolkit.Converters"
              xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
              x:Name="treeView">
-    <VerticalStackLayout x:Name="items" Spacing="5"/>
+    <CollectionView x:Name="list"
+                    SelectionMode="None"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="Fill">
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="controls:TreeViewItem">
+                <controls:TreeViewNode ShowItem="{Binding .}"
+                                       Owner="{Binding Source={x:Reference treeView}, x:DataType=controls:TreeView}"
+                                       ItemHeight="{Binding ItemHeight, Source={x:Reference treeView}, x:DataType=controls:TreeView}"
+                                       ItemTemplate="{Binding ItemTemplate, Source={x:Reference treeView}, x:DataType=controls:TreeView}"/>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentView>

@@ -2,17 +2,18 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
              x:Class="MauiPersianToolkit.Controls.ContainerView"
-             xmlns:ct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:ct="http://schemas.mauipersiantoolkit.com/2026/toolkit"
              xmlns:conv="clr-namespace:MauiPersianToolkit.Converters"
              xmlns:controls="clr-namespace:MauiPersianToolkit.Controls" x:DataType="controls:ContainerView"
              x:Name="ucContainer">
     <ContentView.Resources>
         <ResourceDictionary>
             <conv:StringToBoolConverter x:Key="StringToBool"/>
-            <Shadow Brush="#666" Offset="0,10" Opacity=".3" Radius="15" x:Key="shadow"/>
+            <Shadow Brush="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark=#000000}" Offset="0,10" Opacity=".3" Radius="15" x:Key="shadow"/>
         </ResourceDictionary>
     </ContentView.Resources>
-    <Border Padding="0" Margin="10,5" VerticalOptions="Start" BackgroundColor="#ffffff">
+    <Border Padding="0" Margin="10,5" VerticalOptions="Start"
+            BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="7"/>
         </Border.StrokeShape>
@@ -24,14 +25,16 @@
         <ct:Expander IsExpanded="{Binding IsExpanded,Source={x:Reference ucContainer}}" Padding="10" x:Name="expander" Content="{Binding Contents,Source={x:Reference ucContainer}}" >
             <ct:Expander.Header>
                 <Grid ColumnDefinitions="Auto,100*,Auto" RowDefinitions="Auto">
-                    <Label Text="{Binding Icon,Source={x:Reference ucContainer}}" FontFamily="FontAwesome" FontSize="Small" Grid.Column="0" Grid.Row="0" VerticalOptions="Center" TextColor="DodgerBlue">
+                    <Label Text="{Binding Icon,Source={x:Reference ucContainer}}" FontFamily="FontAwesome" FontSize="Small" Grid.Column="0" Grid.Row="0" VerticalOptions="Center" TextColor="{StaticResource PdtAccent}">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsExpanded,Source={x:Reference expander}}" Value="True">
                                 <Setter Property="Text" Value="&#xf107;"/>
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
-                    <Label Text="{Binding Title,Source={x:Reference ucContainer}}" Padding="0,0,5,0" Grid.Column="1" Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Fill" HorizontalTextAlignment="Start" TextColor="Black" FontFamily="IranianSans">
+                    <Label Text="{Binding Title,Source={x:Reference ucContainer}}" Padding="0,0,5,0" Grid.Column="1" Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Fill" HorizontalTextAlignment="Start"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                           FontFamily="IranianSans">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsExpanded,Source={x:Reference expander}}" Value="True">
                                 <Setter Property="Padding" Value="0,0,5,10"/>

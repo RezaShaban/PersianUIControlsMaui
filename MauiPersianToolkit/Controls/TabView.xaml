@@ -1,19 +1,53 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-             x:Class="MauiPersianToolkit.Controls.TabView">
-  <ContentView.Content>
-        <Grid RowDefinitions="100*,64" x:Name="tabPages" RowSpacing="0" ColumnSpacing="0">
-            <!--tab contents here-->
-            
-            <Border Padding="0" Grid.Row="1" Grid.Column="0" BackgroundColor="White" Margin="0">
-                <Border.StrokeShape>
-                    <RoundRectangle Fill="Transparent" CornerRadius="0" StrokeThickness="0" StrokeLineJoin="Round" Stroke="Transparent"/>
-                </Border.StrokeShape>
-                <Grid HorizontalOptions="Fill" RowDefinitions="64" ColumnDefinitions="20*,20*,20*,20*,20*" x:Name="tabButtons" RowSpacing="0" ColumnSpacing="0">
-                    <!--tab buttons here--> 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiPersianToolkit.Controls.TabView"
+             x:Name="tabView">
+    <Grid RowDefinitions="*,Auto" RowSpacing="0" ColumnSpacing="0">
+
+        <Grid x:Name="contentHost" Grid.Row="0" />
+
+        <Border x:Name="tabBar"
+                Grid.Row="1"
+                HeightRequest="{Binding BarHeight, Source={x:Reference tabView}}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}"
+                StrokeThickness="0"
+                Padding="0"
+                SizeChanged="TabBar_SizeChanged">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#40000000" Offset="0,-2" Radius="8" Opacity="0.18"/>
+            </Border.Shadow>
+
+            <Grid RowDefinitions="Auto,*" RowSpacing="0">
+                <BoxView Grid.Row="0" HeightRequest="1" HorizontalOptions="Fill"
+                         Color="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"/>
+
+                <Grid Grid.Row="1" x:Name="chromeHost" SizeChanged="ChromeHost_SizeChanged">
+                    <Grid x:Name="tabButtons" RowSpacing="0" ColumnSpacing="0" />
+
+                    <!-- LTR overlay so X is always from the physical left (Android RTL breaks Start+TranslationX). -->
+                    <AbsoluteLayout x:Name="indicatorHost"
+                                    InputTransparent="True"
+                                    FlowDirection="LeftToRight">
+                        <Border x:Name="indicator"
+                                AbsoluteLayout.LayoutBounds="0,2,28,3"
+                                AbsoluteLayout.LayoutFlags="None"
+                                HeightRequest="3"
+                                WidthRequest="28"
+                                StrokeThickness="0"
+                                InputTransparent="True"
+                                BackgroundColor="{Binding IndicatorColor, Source={x:Reference tabView}}"
+                                Opacity="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="2"/>
+                            </Border.StrokeShape>
+                        </Border>
+                    </AbsoluteLayout>
                 </Grid>
-            </Border>
-        </Grid>
-    </ContentView.Content>
+            </Grid>
+        </Border>
+    </Grid>
 </ContentView>

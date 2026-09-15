@@ -44,6 +44,7 @@ public partial class ContainerView : ContentView
 
     public ContainerView()
     {
+        PersianTheme.SeedControlResources(Resources);
         InitializeComponent();
     }
 }

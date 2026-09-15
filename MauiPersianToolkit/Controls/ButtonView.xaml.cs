@@ -8,6 +8,7 @@ public partial class ButtonView : ContentView
 {
     public ButtonView()
     {
+        PersianTheme.SeedControlResources(Resources);
         InitializeComponent();
         btn.Clicked += Button_Clicked;
     }

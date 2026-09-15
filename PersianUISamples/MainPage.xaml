@@ -4,6 +4,7 @@
              xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
              x:Class="PersianUISamples.MainPage" FlowDirection="RightToLeft" BackgroundColor="#3E8EED"
              xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:models="clr-namespace:PersianUISamples.Models"
              x:DataType="vm:MainViewModel">
 
     <ContentPage.Resources>
@@ -21,7 +22,12 @@
             </Border.StrokeShape>
         </Border>
     </Grid>-->
-    <pui:TabView SelectedTabColor="{Binding CalendarOption.SelectDayColor}" UnSelectedTabColor="Gray" SelectedTab="0" AnimateCaptions="False">
+    <pui:TabView SelectedTabColor="{Binding CalendarOption.SelectDayColor}"
+                 IndicatorColor="{Binding CalendarOption.SelectDayColor}"
+                 UnSelectedTabColor="#9AA0A6"
+                 SelectedTab="0"
+                 AnimateCaptions="True"
+                 EnableAnimations="True">
         <pui:TabView.ItemsSource>
             <pui:TabItemView Title="تقویم" Icon="&#xf133;" Padding="15">
                 <pui:ContainerView Title="تقویم شمسی">
@@ -45,16 +51,37 @@
             <pui:TabItemView Title="کنترل ها" Icon="&#xf00c;" Padding="15">
                 <pui:ContainerView Title=" کنترل ها">
                     <pui:ContainerView.Contents>
-                        <Grid RowDefinitions="75,Auto,Auto,Auto,Auto,Auto,Auto">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
                             <pui:EntryView PlaceHolder="نام و فامیل" Icon="&#xf007;" AppendText="@" Grid.Row="0"/>
 
-                            <pui:EditorView PlaceHolder="شرح کامل بنویس" Title="شرح کامل" Icon="&#xf075;" Grid.Row="1"/>
+                            <pui:AutoCompleteView PlaceHolder="شهر" Icon="&#xf041;"
+                                                  ItemsSource="{Binding Cities}"
+                                                  DisplayProperty="Title"
+                                                  Text="{Binding SelectedCityText}"
+                                                  SelectedItem="{Binding SelectedCity}"
+                                                  Options="{Binding CityAutoCompleteOptions}"
+                                                  Grid.Row="1"/>
 
-                            <pui:PickerView PlaceHolder="انتخاب تکی" Title="یکی رو انتخاب کن" Grid.Row="2" Icon="&#xf007;" ItemsSource="{Binding PickerItems}" DisplayProperty="Title" ValueMember="Id" SelectionMode="Single" AdditionButtons="{Binding PickerAdditionButtons,Mode=OneWay}" RowIconProperty="Icon"/>
+                            <pui:EditorView PlaceHolder="شرح کامل بنویس" Title="شرح کامل" Icon="&#xf075;" Grid.Row="2"/>
 
-                            <pui:PickerView PlaceHolder="انتخاب چندتایی" Title="چندتا رو انتخاب کن" Grid.Row="3" Icon="&#xf007;" ItemsSource="{Binding PickerMultipleItems}" DisplayProperty="Title" ValueMember="Id" ActivePlaceHolderColor="{Binding CalendarOption.SelectDayColor}" SelectionMode="Multiple" x:Name="picker_2" AdditionButtons="{Binding PickerAdditionButtons,Mode=OneWay}" SelectedItemColor="{Binding CalendarOption.SelectDayColor}">
+                            <pui:TimePicker PlaceHolder="ساعت جلسه" Icon="&#xf017;"
+                                            SelectedTime="{Binding MeetingTime}"
+                                            DisplayFormat="HH:mm"
+                                            Is24Hour="True"
+                                            MinuteInterval="5"
+                                            Grid.Row="3"/>
+
+                            <pui:TimePicker PlaceHolder="زمان با ثانیه (۱۲ ساعته)" Icon="&#xf017;"
+                                            DisplayFormat="hh:mm:ss tt"
+                                            Is24Hour="False"
+                                            ShowSeconds="True"
+                                            Grid.Row="4"/>
+
+                            <pui:PickerView PlaceHolder="انتخاب تکی" Title="یکی رو انتخاب کن" Grid.Row="5" Icon="&#xf007;" ItemsSource="{Binding PickerItems}" DisplayProperty="Title" ValueMember="Id" SelectionMode="Single" AdditionButtons="{Binding PickerAdditionButtons,Mode=OneWay}" RowIconProperty="Icon"/>
+
+                            <pui:PickerView PlaceHolder="انتخاب چندتایی" Title="چندتا رو انتخاب کن" Grid.Row="6" Icon="&#xf007;" ItemsSource="{Binding PickerMultipleItems}" DisplayProperty="Title" ValueMember="Id" ActivePlaceHolderColor="{Binding CalendarOption.SelectDayColor}" SelectionMode="Multiple" x:Name="picker_2" AdditionButtons="{Binding PickerAdditionButtons,Mode=OneWay}" SelectedItemColor="{Binding CalendarOption.SelectDayColor}">
                                 <pui:PickerView.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:PickerItem">
+                                    <DataTemplate x:DataType="models:PickerItem">
                                         <HorizontalStackLayout Padding="15,10" FlowDirection="RightToLeft">
                                             <Label Text="{Binding Icon}" FontFamily="FontAwesome" WidthRequest="32" HeightRequest="32" VerticalOptions="Center" Margin="0,-10" FontSize="Medium" TextColor="Gray"/>
                                             <Label Text="{Binding Title}" TextColor="Black" FontFamily="IranianSans" HorizontalOptions="Start"/>
@@ -64,7 +91,7 @@
                                 </pui:PickerView.ItemTemplate>
                             </pui:PickerView>
 
-                            <pui:SlideButton HeightRequest="48" Grid.Column="0" Grid.Row="4"
+                            <pui:SlideButton HeightRequest="48" Grid.Column="0" Grid.Row="7"
  SlideCompletedCommand="{Binding RegisterInCommand}" FlowDirection="LeftToRight">
                                 <pui:SlideButton.Thumb>
                                     <Frame HasShadow="False" CornerRadius="7" Padding="5" HeightRequest="46" BackgroundColor="White" BorderColor="LimeGreen">
@@ -84,31 +111,52 @@ FontSize="17" FontFamily="IranianSans" TextColor="White"/>
                                 </pui:SlideButton.FillBar>
                             </pui:SlideButton>
 
-                            <pui:LabelView Text="برچسب تستی" Icon="&#xf075;" Grid.Row="5"/>
+                            <pui:LabelView Text="برچسب تستی" Icon="&#xf075;" Grid.Row="8"/>
 
-                            <pui:CheckBoxView Text="انتخاب اول" TextColor="Black" Grid.Row="6"/>
+                            <pui:CheckBoxView Text="انتخاب اول" TextColor="Black" Grid.Row="9"/>
 
                         </Grid>
                     </pui:ContainerView.Contents>
                 </pui:ContainerView>
             </pui:TabItemView>
             <pui:TabItemView Title="TreeView" Icon="&#xf00c;" Padding="0">
-                <ScrollView Padding="15">
-                    <VerticalStackLayout>
-                        <pui:TreeView ItemTemplate="{StaticResource TreeNodeTemplate}" SelectedItems="{Binding SelectedItemsTree}" ItemsSource="{Binding TreeItems}" KeyProperty="Id" ParentChildProperty="ParentId" DisplayProperty="Title" SelectionMode="Multiple" ItemHeight="32"/>
+                <Grid Padding="15" RowDefinitions="*,Auto" RowSpacing="10">
+                    <pui:TreeView Grid.Row="0"
+                                  ItemTemplate="{StaticResource TreeNodeTemplate}"
+                                  SelectedItems="{Binding SelectedItemsTree}"
+                                  ItemsSource="{Binding TreeItems}"
+                                  KeyProperty="Id"
+                                  ParentChildProperty="ParentId"
+                                  DisplayProperty="Title"
+                                  SelectionMode="Multiple"
+                                  ItemHeight="32"/>
+                    <VerticalStackLayout Grid.Row="1" Spacing="8">
                         <HorizontalStackLayout BindableLayout.ItemsSource="{Binding SelectedItemsTree}">
                             <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="vm:TreeViewModel">
+                                <DataTemplate x:DataType="models:TreeNodeModel">
                                     <Button HeightRequest="32" Padding="10,1" Margin="2" Text="{Binding Title}" TextColor="White"/>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </HorizontalStackLayout>
-                        <pui:DatePickerView CalendarOption="{Binding CalendarOption}"/>
+                        <pui:Expander IsExpanded="False">
+                            <pui:Expander.Header>
+                                <Label Text="نمونه Expander" FontFamily="IranianSans" Padding="8"/>
+                            </pui:Expander.Header>
+                            <pui:DatePickerView CalendarOption="{Binding CalendarOption}"/>
+                        </pui:Expander>
                     </VerticalStackLayout>
-                </ScrollView>
+                </Grid>
             </pui:TabItemView>
             <pui:TabItemView Padding="15" Title="ناتیف ها" Icon="&#xf00d;">
-                <Grid ColumnDefinitions="33*,33*,33*" RowDefinitions="40,40" RowSpacing="10">
+                <Grid ColumnDefinitions="33*,33*,33*" RowDefinitions="40,40,40" RowSpacing="10">
+                    <Button Text="Toast me" TextColor="White" Grid.Column="1" Grid.Row="1"
+                Command="{Binding ShowToastCommand}"
+                HorizontalOptions="Center" />
+
+                    <Button Text="Snackbar me" TextColor="White" Grid.Column="2" Grid.Row="1"
+                Command="{Binding ShowSnackbarCommand}"
+                HorizontalOptions="Center" />
+
                     <Button Text="Alert me" TextColor="White" Grid.Column="0"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Command="{Binding ShowAlertCommand}"

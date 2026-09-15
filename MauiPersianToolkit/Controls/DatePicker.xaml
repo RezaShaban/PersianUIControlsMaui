@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-             xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+<controls:PersianInputBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiPersianToolkit.Controls.DatePicker"
-             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls" x:DataType="controls:DatePicker"
+             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
+             xmlns:mpt="http://schemas.mauipersiantoolkit.com/2026/toolkit"
+             x:DataType="controls:DatePicker"
              x:Name="ucDatePicker" Loaded="ucDatePicker_Loaded">
     <ContentView.Resources>
         <ResourceDictionary>
@@ -18,57 +19,93 @@
             </Style>
         </ResourceDictionary>
     </ContentView.Resources>
-    <Grid HorizontalOptions="Fill" ColumnDefinitions="38,100*,Auto,38" RowDefinitions="30,50,15" Padding="0,10" ColumnSpacing="0" RowSpacing="0" x:Name="container">
-        <!--<Grid.GestureRecognizers>
-            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-        </Grid.GestureRecognizers>-->
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding PlaceHolder,Source={x:Reference ucDatePicker}}" HorizontalOptions="Start" VerticalTextAlignment="Center" Grid.Row="0" VerticalOptions="Center" InputTransparent="True" FontFamily="IranianSans" TextColor="{Binding PlaceHolderColor,Source={x:Reference ucDatePicker}}" Margin="5,0,0,0" FontAttributes="Bold"/>
 
-        <Label Text="{Binding Icon,Source={x:Reference ucDatePicker}}" FontSize="18" WidthRequest="38" Grid.Column="0" Grid.Row="1" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center" TextColor="{Binding PlaceHolderColor,Source={x:Reference ucDatePicker}}" InputTransparent="True" Padding="0,0,15,0" FontFamily="FontAwesome">
+    <!-- Column 0 = icon (right under RTL), column 1 = value, column 2 = chevron -->
+    <Grid HorizontalOptions="Fill" ColumnDefinitions="Auto,*,Auto" RowDefinitions="30,52,15"
+          Padding="0,10" ColumnSpacing="0" RowSpacing="0" x:Name="container">
+
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+               Text="{Binding PlaceHolder,Source={x:Reference ucDatePicker}}"
+               HorizontalOptions="Start" VerticalTextAlignment="Center" VerticalOptions="Center"
+               InputTransparent="True" FontFamily="IranianSans"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference ucDatePicker}}"
+               Margin="5,0,0,0" FontAttributes="Bold"/>
+
+        <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                   x:Name="outline"
+                   Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                   StrokeThickness="1"
+                   Fill="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}"
+                   RadiusX="5" RadiusY="5" InputTransparent="True"/>
+
+        <StackLayout Grid.Row="1" Grid.Column="1" Margin="6,4" VerticalOptions="Center" InputTransparent="True">
+            <Label HorizontalOptions="Fill"
+                   Text="{Binding FormattedDate,Source={x:Reference ucDatePicker}}"
+                   Margin="0" FontSize="Small" HorizontalTextAlignment="Start" HeightRequest="44"
+                   VerticalOptions="Center" VerticalTextAlignment="Center"
+                   TextColor="{Binding TextColor,Source={x:Reference ucDatePicker}}"
+                   FontFamily="IranianSans" IsVisible="False" InputTransparent="True">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding CalendarOption.SelectionMode,Source={x:Reference ucDatePicker}}" Value="Single">
+                        <Setter Property="IsVisible" Value="True"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <HorizontalStackLayout HorizontalOptions="Fill"
+                                   BindableLayout.ItemsSource="{Binding BadgeDates,Source={x:Reference ucDatePicker}}"
+                                   VerticalOptions="Center" HeightRequest="44" InputTransparent="True" IsVisible="True">
+                <HorizontalStackLayout.Triggers>
+                    <DataTrigger TargetType="HorizontalStackLayout" Binding="{Binding CalendarOption.SelectionMode,Source={x:Reference ucDatePicker}}" Value="Single">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </HorizontalStackLayout.Triggers>
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Button FontSize="13" Padding="10,2" Text="{Binding .}"
+                                Background="{Binding CalendarOption.InRangeDayColor,Source={x:Reference ucDatePicker}}"
+                                VerticalOptions="Center" HorizontalOptions="Start" Margin="1,0"
+                                TextColor="{Binding CalendarOption.SelectDayColor,Source={x:Reference ucDatePicker}}"
+                                InputTransparent="True"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+                <BindableLayout.EmptyView>
+                    <Label FontSize="13" Padding="10,2" Text="{mpt:Localize SelectDate}" Background="Transparent"
+                           VerticalOptions="Center" HorizontalOptions="Start" Margin="1,0"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"
+                           InputTransparent="True"/>
+                </BindableLayout.EmptyView>
+            </HorizontalStackLayout>
+        </StackLayout>
+
+        <!-- Icon above the Border fill -->
+        <Label Grid.Column="0" Grid.Row="1"
+               Text="{Binding Icon,Source={x:Reference ucDatePicker}}"
+               FontSize="18" WidthRequest="38" HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center" VerticalOptions="Center"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference ucDatePicker}}"
+               InputTransparent="True" FontFamily="FontAwesome">
             <Label.Triggers>
                 <DataTrigger TargetType="Label" Binding="{Binding Icon,Source={x:Reference ucDatePicker}}" Value="">
                     <Setter Property="IsVisible" Value="False"/>
+                    <Setter Property="WidthRequest" Value="0"/>
                 </DataTrigger>
             </Label.Triggers>
         </Label>
 
-        <Border Stroke="Gainsboro" Grid.Row="1" Grid.Column="0" Background="Transparent" HorizontalOptions="Fill" Grid.ColumnSpan="4" Padding="48,0,0,0" InputTransparent="True">
-            <Border.Triggers>
-                <DataTrigger TargetType="Border" Binding="{Binding Icon,Source={x:Reference ucDatePicker}}" Value="">
-                    <Setter Property="Padding" Value="0"/>
-                </DataTrigger>
-            </Border.Triggers>
-            <Border.StrokeShape>
-                <RoundRectangle Fill="Transparent" CornerRadius="5" StrokeThickness="1" StrokeLineJoin="Round" Stroke="Gainsboro"/>
-            </Border.StrokeShape>
-            <StackLayout Margin="0,0,38,0">
-                <Label HorizontalOptions="Fill" Text="{Binding FormattedDate,Source={x:Reference ucDatePicker}}" Margin="0" FontSize="Small" HorizontalTextAlignment="Start" HeightRequest="42" VerticalOptions="Center" VerticalTextAlignment="Center" TextColor="{Binding TextColor,Source={x:Reference ucDatePicker}}" TranslationY="3" FontFamily="IranianSans" IsVisible="False" InputTransparent="True">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding CalendarOption.SelectionMode,Source={x:Reference ucDatePicker}}" Value="Single">
-                            <Setter Property="IsVisible" Value="True"/>
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
+        <Label Text="&#xf107;" Grid.Column="2" Grid.Row="1"
+               VerticalOptions="Center" HorizontalOptions="Center"
+               FontFamily="FontAwesome"
+               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+               FontAutoScalingEnabled="True"
+               WidthRequest="28" HeightRequest="28" Background="Transparent"
+               Padding="1" FontSize="Medium" InputTransparent="True"/>
 
-                <HorizontalStackLayout HorizontalOptions="Fill" BindableLayout.ItemsSource="{Binding BadgeDates,Source={x:Reference ucDatePicker}}" VerticalOptions="Fill" HeightRequest="50" InputTransparent="True" IsVisible="True">
-                    <HorizontalStackLayout.Triggers>
-                        <DataTrigger TargetType="HorizontalStackLayout" Binding="{Binding CalendarOption.SelectionMode,Source={x:Reference ucDatePicker}}" Value="Single">
-                            <Setter Property="IsVisible" Value="False"/>
-                        </DataTrigger>
-                    </HorizontalStackLayout.Triggers>
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="x:String">
-                            <Button FontSize="13" Padding="10,2" Text="{Binding .}" Background="{Binding CalendarOption.InRangeDayColor,Source={x:Reference ucDatePicker}}" VerticalOptions="Center" HorizontalOptions="Start" Margin="1,0" TextColor="{Binding CalendarOption.SelectDayColor,Source={x:Reference ucDatePicker}}" InputTransparent="True"/>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                    <BindableLayout.EmptyView>
-                        <Label FontSize="13" Padding="10,2" Text="انتخاب تاریخ" Background="Transparent" VerticalOptions="Center" HorizontalOptions="Start" Margin="1,0" TextColor="Gray" InputTransparent="True"/>
-                    </BindableLayout.EmptyView>
-                </HorizontalStackLayout>
-            </StackLayout>
-        </Border>
-
-        <Label Text="{Binding ErrorMessage,Source={x:Reference ucDatePicker}}" Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" Grid.Row="2" InputTransparent="True" VerticalOptions="Center" Margin="0,-10,0,-24" IsVisible="{Binding IsValid,Source={x:Reference ucDatePicker}}" FontFamily="IranianSans"/>
-        <Label Text="&#xf107;" Margin="0,5,0,0" Grid.Column="3" Grid.Row="1" VerticalOptions="Center" HorizontalOptions="Center" FontFamily="FontAwesome" TextColor="#333" FontAutoScalingEnabled="True" WidthRequest="28" HeightRequest="28" Background="Transparent" Padding="1" FontSize="Medium" InputTransparent="True"/>
+        <Label Text="{Binding ErrorMessage,Source={x:Reference ucDatePicker}}"
+               Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"
+               VerticalTextAlignment="Center" Grid.Row="2" InputTransparent="True"
+               VerticalOptions="Center" Margin="0,-10,0,-24"
+               IsVisible="{Binding IsValid,Source={x:Reference ucDatePicker}}"
+               FontFamily="IranianSans"/>
     </Grid>
-</ContentView>
+</controls:PersianInputBase>

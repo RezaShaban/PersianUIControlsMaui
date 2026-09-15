@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<controls:PersianInputBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiPersianToolkit.Controls.AutoCompleteView"
+             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
+             x:DataType="controls:AutoCompleteView"
+             x:Name="autoComplete">
+
+    <Grid HorizontalOptions="Fill" RowDefinitions="Auto,52,Auto" Padding="0,10" RowSpacing="0">
+
+        <Label Grid.Row="0"
+               Text="{Binding PlaceHolder,Source={x:Reference autoComplete}}"
+               HorizontalOptions="Start" VerticalTextAlignment="Center"
+               InputTransparent="True" Margin="5,0,0,0"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference autoComplete},Mode=OneWay}"
+               FontFamily="IranianSans" FontAttributes="Bold"/>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto">
+            <Rectangle Grid.ColumnSpan="4" x:Name="outline"
+                       Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                       StrokeThickness="1"
+                       Fill="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}"
+                       RadiusX="5" RadiusY="5" InputTransparent="True"/>
+
+            <Label Grid.Column="0"
+                   Text="{Binding Icon,Source={x:Reference autoComplete}}"
+                   FontSize="18" WidthRequest="48"
+                   VerticalTextAlignment="Center" HorizontalTextAlignment="Center"
+                   VerticalOptions="Fill"
+                   TextColor="{Binding PlaceHolderColor,Source={x:Reference autoComplete},Mode=OneWay}"
+                   FontFamily="FontAwesome" InputTransparent="True">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding Icon,Source={x:Reference autoComplete}}" Value="">
+                        <Setter Property="IsVisible" Value="False"/>
+                        <Setter Property="WidthRequest" Value="0"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <controls:PersianAutoSuggest Grid.Column="1" x:Name="suggest"
+                       Margin="8,0"
+                       VerticalOptions="Fill" HorizontalOptions="Fill"
+                       Text="{Binding Text,Source={x:Reference autoComplete}}"
+                       TextColor="{Binding TextColor,Source={x:Reference autoComplete}}"
+                       PlaceholderColor="{Binding PlaceHolderColor,Source={x:Reference autoComplete}}"
+                       FlowDirection="{Binding EntryFlowDirection,Source={x:Reference autoComplete}}"/>
+
+            <Border Grid.Column="2" x:Name="btnClear" WidthRequest="36" HeightRequest="36"
+                    VerticalOptions="Center" StrokeThickness="0" IsVisible="False"
+                    BackgroundColor="Transparent">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="18"/>
+                </Border.StrokeShape>
+                <Label Text="&#xf00d;" FontFamily="FontAwesome" FontSize="13"
+                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnClearTapped"/>
+                </Border.GestureRecognizers>
+            </Border>
+
+            <Label Grid.Column="3" Text="&#xf002;" FontFamily="FontAwesome" FontSize="14"
+                   WidthRequest="30" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                   VerticalOptions="Fill" InputTransparent="True"
+                   TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+        </Grid>
+
+        <!-- Managed suggestion panel (iOS always; Android/Windows when native dropdown is off) -->
+        <Border Grid.Row="2" x:Name="suggestionsPanel"
+                IsVisible="False" Margin="0,6,0,0" StrokeThickness="1" Padding="0"
+                Opacity="0"
+                Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#50000000" Offset="0,4" Radius="12" Opacity="0.2"/>
+            </Border.Shadow>
+
+            <Grid>
+                <CollectionView x:Name="suggestionsList"
+                                SelectionMode="Single"
+                                SelectionChanged="OnSuggestionSelected"
+                                RemainingItemsThreshold="0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="controls:AutoCompleteSuggestion">
+                            <Grid Padding="14,12" ColumnDefinitions="*,Auto"
+                                  BackgroundColor="Transparent">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup Name="CommonStates">
+                                            <VisualState Name="Normal"/>
+                                            <VisualState Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#185B2BDF"/>
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                                <Label Text="{Binding Display}"
+                                       FontFamily="IranianSans" FontSize="14"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                                       LineBreakMode="TailTruncation"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Label x:Name="lblEmpty" IsVisible="False"
+                       FontFamily="IranianSans" FontSize="13"
+                       Padding="16,18" HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+
+                <ActivityIndicator x:Name="busyIndicator" IsVisible="False" IsRunning="False"
+                                   WidthRequest="28" HeightRequest="28"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   Color="{StaticResource PdtAccent}"/>
+            </Grid>
+        </Border>
+
+        <Label Text="{Binding ErrorMessage,Source={x:Reference autoComplete}}"
+               Grid.Row="1" HorizontalOptions="End" FontSize="12"
+               InputTransparent="True" VerticalOptions="End" Margin="0,0,0,-18"
+               IsVisible="{Binding IsValid,Source={x:Reference autoComplete}}"
+               TextColor="{Binding ErrorMessageColor,Source={x:Reference autoComplete}}"
+               FontFamily="IranianSans"/>
+    </Grid>
+</controls:PersianInputBase>

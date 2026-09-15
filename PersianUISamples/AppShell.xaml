@@ -3,12 +3,73 @@
     x:Class="PersianUISamples.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:PersianUISamples"
-    Shell.FlyoutBehavior="Disabled">
+    xmlns:pages="clr-namespace:PersianUISamples.Pages"
+    FlyoutBackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}"
+    Shell.FlyoutBehavior="Flyout">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <Shell.FlyoutHeader>
+        <Border x:Name="FlyoutHeaderBorder" StrokeThickness="0" Padding="20,28,20,20"
+                BackgroundColor="{StaticResource PdtAccent}">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="MauiPersianToolkit" FontFamily="IranianSans" FontAttributes="Bold"
+                       FontSize="18" TextColor="White"/>
+                <Label x:Name="FlyoutSubtitleLabel" FontFamily="IranianSans" FontSize="12"
+                       TextColor="#E8E4FF"/>
+            </VerticalStackLayout>
+        </Border>
+    </Shell.FlyoutHeader>
 
+    <FlyoutItem x:Name="HomeItem">
+        <ShellContent x:Name="HomeContent"
+                      ContentTemplate="{DataTemplate pages:HomePage}"
+                      Route="home"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="InputsItem">
+        <ShellContent x:Name="InputsContent"
+                      ContentTemplate="{DataTemplate pages:InputsPage}"
+                      Route="inputs"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="AutoCompleteItem">
+        <ShellContent x:Name="AutoCompleteContent"
+                      ContentTemplate="{DataTemplate pages:AutoCompletePage}"
+                      Route="autocomplete"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="PickersItem">
+        <ShellContent x:Name="PickersContent"
+                      ContentTemplate="{DataTemplate pages:PickersPage}"
+                      Route="pickers"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="DateTimeItem">
+        <ShellContent x:Name="DateTimeContent"
+                      ContentTemplate="{DataTemplate pages:DateTimePage}"
+                      Route="datetime"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="LayoutItem">
+        <ShellContent x:Name="LayoutContent"
+                      ContentTemplate="{DataTemplate pages:LayoutPage}"
+                      Route="layout"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="TreeItem">
+        <ShellContent x:Name="TreeContent"
+                      ContentTemplate="{DataTemplate pages:TreePage}"
+                      Route="tree"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="DialogsItem">
+        <ShellContent x:Name="DialogsContent"
+                      ContentTemplate="{DataTemplate pages:DialogsPage}"
+                      Route="dialogs"/>
+    </FlyoutItem>
+
+    <FlyoutItem x:Name="SettingsItem">
+        <ShellContent x:Name="SettingsContent"
+                      ContentTemplate="{DataTemplate pages:SettingsPage}"
+                      Route="settings"/>
+    </FlyoutItem>
 </Shell>

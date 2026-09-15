@@ -9,11 +9,11 @@ namespace MauiPersianToolkit.Services.Calendar;
 /// </summary>
 public class HijriCalendarService : ICalendarService
 {
-    private readonly HijriCalendar _calendar = new() { HijriAdjustment = -1 };
+    private readonly HijriCalendar _calendar = new() { HijriAdjustment = 0 };
 
-    // Islamic month names
-    private static readonly string[] HijriMonthNames = new[]
-    {
+    // Islamic month names (short labels for the month picker)
+    private static readonly string[] HijriMonthNames =
+    [
         "محرم",
         "صفر",
         "ر.الأول",
@@ -26,7 +26,7 @@ public class HijriCalendarService : ICalendarService
         "شوال",
         "ذ.القعدة",
         "ذ.الحجة"
-    };
+    ];
 
     public string ToCalendarDate(DateTime gregorianDate)
     {
@@ -169,7 +169,10 @@ public class HijriCalendarService : ICalendarService
         }
     }
 
-    public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Saturday;
+    // Iranian-style week: Saturday → Friday (same as Persian).
+    public DayOfWeek GetFirstDayOfWeek() => DayOfWeek.Saturday;
+
+    public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Friday;
 
     public bool IsLeapYear(int year)
     {

@@ -1,27 +1,70 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-             x:Class="PersianUIControlsMaui.Controls.TimePicker"
-             x:Name="ucTimePicker">
-  <ContentView.Content>
-        <Grid HorizontalOptions="FillAndExpand" ColumnDefinitions="28,100*,Auto,24" RowDefinitions="42"
-              Padding="0,10" ColumnSpacing="0" RowSpacing="0">
-            <Rectangle Aspect="Fill" RadiusX="5" RadiusY="5" StrokeThickness="1" HeightRequest="42" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Fill="#fdfdfd" x:Name="rectangle" WidthRequest="500" StrokeLineJoin="Round" Stroke="Gainsboro"/>
-            <Label StyleId="icon" Text="{Binding Icon,Source={x:Reference ucTimePicker}}" FontSize="18" WidthRequest="28" Grid.Column="0" Grid.Row="0" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center" TextColor="{Binding PlaceHolderColor,Source={x:Reference ucTimePicker}}" InputTransparent="True" Padding="0,0,5,0" x:Name="lblIcon" FontFamily="FontAwesome"/>
-            <Entry HorizontalOptions="FillAndExpand" Text="{Binding FormattedTime,Source={x:Reference ucTimePicker}}" Grid.Column="1" InputTransparent="True" Grid.Row="0" Margin="0" FontSize="Small" x:Name="txtEntry" HorizontalTextAlignment="Center" HeightRequest="42" VerticalOptions="End" VerticalTextAlignment="End" IsReadOnly="True" TextColor="{Binding TextColor,Source={x:Reference ucTimePicker}}" BindingContext="{Binding SelectedTime,Source={x:Reference ucTimePicker}}" TranslationY="3"/>
-            <Label Grid.Column="1" Text="{Binding PlaceHolder,Source={x:Reference ucTimePicker}}"
-                   HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" x:Name="lblPlaceholder"
-                   Grid.Row="0" VerticalOptions="Center" InputTransparent="True"
-                   TextColor="{Binding PlaceHolderColor,Source={x:Reference ucTimePicker}}"/>
+<controls:PersianInputBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiPersianToolkit.Controls.TimePicker"
+             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
+             x:DataType="controls:TimePicker"
+             x:Name="ucTimePicker"
+             Loaded="OnLoaded">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="IranianSans"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
 
-            <Label Text="{Binding ErrorMessage,Source={x:Reference ucTimePicker}}" Grid.Column="0" Grid.ColumnSpan="2"
-                   HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" x:Name="lblMessage"
-                   Grid.Row="1" InputTransparent="True" VerticalOptions="Center" Margin="0,-10,0,-24"
-                   IsVisible="{Binding IsValid,Source={x:Reference ucTimePicker}}"
-                   Style="{AppThemeBinding Dark={StaticResource ValidationErrorStyleDark},Light={StaticResource ValidationErrorStyle}}"/>
-            <Label Text="&#xf107;" Grid.Column="3" Grid.Row="0" StyleId="x" VerticalOptions="Center"
-                   HorizontalOptions="Center" FontSize="Medium" FontFamily="FontAwesome"/>
-            <TimePicker Time="{Binding SelectedTime,Source={x:Reference ucTimePicker}}" Opacity="0" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4"/>
-        </Grid>
-    </ContentView.Content>
-</ContentView>
+    <Grid HorizontalOptions="Fill" ColumnDefinitions="Auto,*,Auto" RowDefinitions="30,52,15"
+          Padding="0,10" ColumnSpacing="0" RowSpacing="0" x:Name="container">
+
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+               Text="{Binding PlaceHolder,Source={x:Reference ucTimePicker}}"
+               HorizontalOptions="Start" VerticalTextAlignment="Center" VerticalOptions="Center"
+               InputTransparent="True" FontFamily="IranianSans"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference ucTimePicker}}"
+               Margin="5,0,0,0" FontAttributes="Bold"/>
+
+        <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                   x:Name="outline"
+                   Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                   StrokeThickness="1"
+                   Fill="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}"
+                   RadiusX="5" RadiusY="5" InputTransparent="True"/>
+
+        <Label Grid.Row="1" Grid.Column="1"
+               Text="{Binding FormattedTime,Source={x:Reference ucTimePicker}}"
+               Margin="6,0" FontSize="Small"
+               HorizontalOptions="Fill" VerticalOptions="Center"
+               VerticalTextAlignment="Center" HorizontalTextAlignment="Start"
+               TextColor="{Binding TextColor,Source={x:Reference ucTimePicker}}"
+               FontFamily="IranianSans" InputTransparent="True"/>
+
+        <Label Grid.Column="0" Grid.Row="1"
+               Text="{Binding Icon,Source={x:Reference ucTimePicker}}"
+               FontSize="18" WidthRequest="38" HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center" VerticalOptions="Center"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference ucTimePicker}}"
+               InputTransparent="True" FontFamily="FontAwesome">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding Icon,Source={x:Reference ucTimePicker}}" Value="">
+                    <Setter Property="IsVisible" Value="False"/>
+                    <Setter Property="WidthRequest" Value="0"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
+
+        <Label Text="&#xf017;" Grid.Column="2" Grid.Row="1"
+               VerticalOptions="Center" HorizontalOptions="Center"
+               FontFamily="FontAwesome"
+               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+               WidthRequest="28" HeightRequest="28" Background="Transparent"
+               Padding="1" FontSize="Medium" InputTransparent="True"/>
+
+        <Label Text="{Binding ErrorMessage,Source={x:Reference ucTimePicker}}"
+               Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"
+               VerticalTextAlignment="Center" Grid.Row="2" InputTransparent="True"
+               VerticalOptions="Center" Margin="0,-10,0,-24"
+               IsVisible="{Binding IsValid,Source={x:Reference ucTimePicker}}"
+               FontFamily="IranianSans"/>
+    </Grid>
+</controls:PersianInputBase>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             x:Name="page"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="{Binding PageTitle}" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding ThemeTitle}"
+                              Hint="{Binding ThemeHint}">
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Themes}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ThemeChoice">
+                            <Border StrokeThickness="1" Padding="12,10"
+                                    Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BindingContext.SelectThemeCommand, Source={x:Reference page}}"
+                                                          CommandParameter="{Binding Mode}"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="{Binding Label}" FontFamily="IranianSans" FontSize="14"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                                    <Label Grid.Column="1" Text="&#xf00c;" FontFamily="FontAwesome"
+                                           TextColor="{StaticResource PdtAccent}"
+                                           IsVisible="{Binding IsSelected}" VerticalOptions="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding LanguageTitle}"
+                              Hint="{Binding LanguageHint}">
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Languages}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LanguageChoice">
+                            <Border StrokeThickness="1" Padding="12,10"
+                                    Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BindingContext.SelectLanguageCommand, Source={x:Reference page}}"
+                                                          CommandParameter="{Binding Code}"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding NativeName}" FontFamily="IranianSans" FontAttributes="Bold" FontSize="14"
+                                               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                                        <Label Text="{Binding EnglishName}" FontFamily="IranianSans" FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="&#xf00c;" FontFamily="FontAwesome"
+                                           TextColor="{StaticResource PdtAccent}"
+                                           IsVisible="{Binding IsSelected}" VerticalOptions="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding ToolkitNoteTitle}"
+                              Hint="{Binding ToolkitNote}">
+                <Label Text="{Binding ActiveSummary}"
+                       FontFamily="IranianSans" FontSize="13"
+                       TextColor="{StaticResource PdtAccent}"/>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

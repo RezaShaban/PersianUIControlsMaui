@@ -52,7 +52,7 @@ public class ToggleButton : ContentView
     public bool Animate
     {
         get => (bool)GetValue(AnimateProperty);
-        set => SetValue(CheckedProperty, value);
+        set => SetValue(AnimateProperty, value);
     }
 
     public ImageSource CheckedImage

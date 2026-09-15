@@ -1,31 +1,69 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+<controls:PersianInputBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiPersianToolkit.Controls.EntryView"
              xmlns:controls="clr-namespace:MauiPersianToolkit.Controls" x:DataType="controls:EntryView"
              x:Name="entryView">
-    <Grid HorizontalOptions="Fill" ColumnDefinitions="Auto,100*,Auto" RowDefinitions="Auto,50" Padding="0,10" ColumnSpacing="0">
-        <Label Text="{Binding Icon,Source={x:Reference entryView}}" FontSize="18" WidthRequest="48" Grid.Column="0" Grid.Row="1" VerticalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Fill" TextColor="{Binding PlaceHolderColor,Source={x:Reference entryView},Mode=OneWay}" HorizontalTextAlignment="Center" FontFamily="FontAwesome"/>
+    <!-- Column 0 = icon (right under RTL), column 1 = text, column 2 = append -->
+    <Grid HorizontalOptions="Fill" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,52" Padding="0,10" ColumnSpacing="0">
 
-        <Label Grid.Column="0" Text="{Binding PlaceHolder,Source={x:Reference entryView}}" Padding="0" HorizontalOptions="Start" VerticalTextAlignment="Center" x:Name="lblPlaceholder" Grid.Row="0" InputTransparent="True" VerticalOptions="Center" TextColor="{Binding PlaceHolderColor,Source={x:Reference entryView},Mode=OneWay}" Grid.ColumnSpan="2" FontFamily="IranianSans" FontAttributes="Bold"/>
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+               Text="{Binding PlaceHolder,Source={x:Reference entryView}}"
+               Padding="0" HorizontalOptions="Start" VerticalTextAlignment="Center"
+               x:Name="lblPlaceholder" InputTransparent="True" VerticalOptions="Center"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference entryView},Mode=OneWay}"
+               FontFamily="IranianSans" FontAttributes="Bold"/>
 
-        <Border Stroke="Gainsboro" Grid.Row="1" Grid.Column="0" Background="Transparent" HorizontalOptions="Fill" Grid.ColumnSpan="4" Padding="42,0,0,0">
-            <Border.StrokeShape>
-                <RoundRectangle Fill="#fdfdfd" CornerRadius="5" StrokeThickness="1" StrokeLineJoin="Round" Stroke="Gainsboro"/>
-            </Border.StrokeShape>
-            <Border.Triggers>
-                <DataTrigger TargetType="Border" Binding="{Binding Icon,Source={x:Reference entryView}}" Value="">
-                    <Setter Property="Padding" Value="0"/>
+        <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                   x:Name="outline"
+                   Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                   StrokeThickness="1"
+                   Fill="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}"
+                   RadiusX="5" RadiusY="5" InputTransparent="True"/>
+
+        <!-- Optical TranslationY: IranianSans glyph box sits high in the em square. -->
+        <Entry Grid.Row="1" Grid.Column="1"
+               HorizontalOptions="Fill" VerticalOptions="Fill"
+               VerticalTextAlignment="Center"
+               Text="{Binding Text,Source={x:Reference entryView}}"
+               Margin="8,0" FontSize="Small" x:Name="entry"
+               TranslationY="2"
+               BackgroundColor="Transparent"
+               ReturnType="{Binding ReturnType,Source={x:Reference entryView}}"
+               FlowDirection="{Binding EntryFlowDirection,Source={x:Reference entryView}}"
+               ReturnCommand="{Binding ReturnCommand,Source={x:Reference entryView}}"
+               Keyboard="{Binding Keyboard,Source={x:Reference entryView}}"
+               TextColor="{Binding TextColor,Source={x:Reference entryView}}"
+               IsPassword="{Binding IsPassword,Source={x:Reference entryView}}"
+               HorizontalTextAlignment="{Binding HorizontalTextAlignment,Source={x:Reference entryView}}"
+               Placeholder="{Binding PlaceHolder,Source={x:Reference entryView}}"
+               FontFamily="IranianSans" TextChanged="entry_TextChanged"/>
+
+        <!-- Icon drawn last so it sits above the Border fill (right side under RTL). -->
+        <Label Grid.Column="0" Grid.Row="1"
+               Text="{Binding Icon,Source={x:Reference entryView}}"
+               FontSize="18" WidthRequest="48" VerticalTextAlignment="Center"
+               HorizontalOptions="Center" VerticalOptions="Fill"
+               TextColor="{Binding PlaceHolderColor,Source={x:Reference entryView},Mode=OneWay}"
+               HorizontalTextAlignment="Center" FontFamily="FontAwesome" InputTransparent="True">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding Icon,Source={x:Reference entryView}}" Value="">
+                    <Setter Property="IsVisible" Value="False"/>
+                    <Setter Property="WidthRequest" Value="0"/>
                 </DataTrigger>
-            </Border.Triggers>
-            <Entry HorizontalOptions="Fill" Text="{Binding Text,Source={x:Reference entryView}}" Grid.Column="1" Grid.Row="0" Margin="0" FontSize="Small" x:Name="entry" HeightRequest="50" VerticalOptions="Fill" VerticalTextAlignment="End" ReturnType="{Binding ReturnType,Source={x:Reference entryView}}" FlowDirection="{Binding EntryFlowDirection,Source={x:Reference entryView}}" ReturnCommand="{Binding ReturnCommand,Source={x:Reference entryView}}" Keyboard="{Binding Keyboard,Source={x:Reference entryView}}" TextColor="{Binding TextColor,Source={x:Reference entryView}}" IsPassword="{Binding IsPassword,Source={x:Reference entryView}}" HorizontalTextAlignment="{Binding HorizontalTextAlignment,Source={x:Reference entryView}}" Placeholder="{Binding PlaceHolder,Source={x:Reference entryView}}" FontFamily="IranianSans" TextChanged="entry_TextChanged"/>
-        </Border>
+            </Label.Triggers>
+        </Label>
 
-        <Label Grid.Row="1" Grid.Column="2" Text="{Binding AppendText,Source={x:Reference entryView}}" VerticalOptions="Center" FlowDirection="LeftToRight" HorizontalOptions="End" Padding="10,0,5,0" x:Name="append"/>
-        <Label Text="{Binding ErrorMessage,Source={x:Reference entryView}}" Grid.Column="0" Grid.ColumnSpan="3"
-                   HorizontalOptions="End" VerticalTextAlignment="Center" x:Name="lblMessage" FontSize="12"
-                   Grid.Row="2" InputTransparent="True" VerticalOptions="End" Margin="0,-10,0,-24"
-                   IsVisible="{Binding IsValid,Source={x:Reference entryView}}"
-                   TextColor="{Binding ErrorMessageColor,Source={x:Reference entryView}}"/>
+        <Label Grid.Row="1" Grid.Column="2"
+               Text="{Binding AppendText,Source={x:Reference entryView}}"
+               VerticalOptions="Center" FlowDirection="LeftToRight" HorizontalOptions="End"
+               Padding="6,0,8,0" x:Name="append" InputTransparent="True"/>
+
+        <Label Text="{Binding ErrorMessage,Source={x:Reference entryView}}"
+               Grid.Column="0" Grid.ColumnSpan="3"
+               HorizontalOptions="End" VerticalTextAlignment="Center" x:Name="lblMessage" FontSize="12"
+               Grid.Row="1" InputTransparent="True" VerticalOptions="End" Margin="0,0,0,-18"
+               IsVisible="{Binding IsValid,Source={x:Reference entryView}}"
+               TextColor="{Binding ErrorMessageColor,Source={x:Reference entryView}}"/>
     </Grid>
-</ContentView>
+</controls:PersianInputBase>

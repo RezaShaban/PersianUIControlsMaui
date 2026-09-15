@@ -1,97 +1,111 @@
 ﻿using System.Runtime.CompilerServices;
 
 namespace MauiPersianToolkit.Controls;
+
+/// <summary>
+/// Single virtualized row for <see cref="TreeView"/>. Expansion mutates the owner's
+/// flattened <see cref="TreeView.VisibleRows"/> instead of nesting visual children.
+/// </summary>
 [XamlCompilation(XamlCompilationOptions.Compile)]
 public partial class TreeViewNode : ContentView
 {
-    public event EventHandler<TreeViewItem> SelectedItemChanged;
+    private bool _suppressSelectionEvent;
+
     public TreeViewNode()
     {
+        PersianTheme.SeedControlResources(Resources);
         InitializeComponent();
     }
 
-    public static readonly BindableProperty ShowItemProperty = BindableProperty.Create(nameof(ShowItem), typeof(TreeViewItem), typeof(TreeViewNode), default(TreeViewItem), BindingMode.TwoWay);
-    public TreeViewItem ShowItem
+    public static readonly BindableProperty ShowItemProperty = BindableProperty.Create(
+        nameof(ShowItem), typeof(TreeViewItem), typeof(TreeViewNode), default(TreeViewItem),
+        propertyChanged: static (b, _, _) => ((TreeViewNode)b).OnShowItemChanged());
+
+    public TreeViewItem? ShowItem
     {
-        get { return (TreeViewItem)GetValue(ShowItemProperty); }
-        set { SetValue(ShowItemProperty, value); }
+        get => (TreeViewItem?)GetValue(ShowItemProperty);
+        set => SetValue(ShowItemProperty, value);
     }
 
-    public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList<TreeViewItem>), typeof(TreeViewNode), default(IList<TreeViewItem>), BindingMode.TwoWay);
-    public IList<TreeViewItem> ItemsSource
+    public static readonly BindableProperty OwnerProperty = BindableProperty.Create(
+        nameof(Owner), typeof(TreeView), typeof(TreeViewNode));
+
+    public TreeView? Owner
     {
-        get { return (IList<TreeViewItem>)GetValue(ItemsSourceProperty); }
-        set { SetValue(ItemsSourceProperty, value); }
+        get => (TreeView?)GetValue(OwnerProperty);
+        set => SetValue(OwnerProperty, value);
     }
 
-    public static readonly BindableProperty IsExpandedProperty = BindableProperty.Create(nameof(IsExpanded), typeof(bool), typeof(TreeViewNode), default(bool), BindingMode.TwoWay);
-    public bool IsExpanded
-    {
-        get { return (bool)GetValue(IsExpandedProperty); }
-        set { SetValue(IsExpandedProperty, value); }
-    }
+    public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(
+        nameof(ItemTemplate), typeof(ControlTemplate), typeof(TreeViewNode), default(ControlTemplate),
+        propertyChanged: static (b, _, _) => ((TreeViewNode)b).UpdateTemplateVisibility());
 
-    public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(ControlTemplate), typeof(TreeViewNode), default(ControlTemplate), BindingMode.TwoWay);
-    public ControlTemplate ItemTemplate
+    public ControlTemplate? ItemTemplate
     {
-        get => (ControlTemplate)GetValue(ItemTemplateProperty);
+        get => (ControlTemplate?)GetValue(ItemTemplateProperty);
         set => SetValue(ItemTemplateProperty, value);
     }
 
-    protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    public static readonly BindableProperty ItemHeightProperty = BindableProperty.Create(
+        nameof(ItemHeight), typeof(int), typeof(TreeViewNode), 32);
+
+    public int ItemHeight
     {
-        if (propertyName == nameof(IsExpanded))
-        {
-            if (ChildItems.Children.Count == 0 && IsExpanded)
-            {
-                var childItemsSource = this.ItemsSource.Where(x => object.Equals(x.ParentId, ShowItem.Id)).ToList();
-                double destinationHeight = childItemsSource.Count * 32;
-                bool canCollapse = ChildItems.HeightRequest >= destinationHeight;
+        get => (int)GetValue(ItemHeightProperty);
+        set => SetValue(ItemHeightProperty, value);
+    }
 
-                foreach (var item in childItemsSource)
-                {
-                    item.ChildItems = ItemsSource.Where(x => object.Equals(x.ParentId, item.Id)).ToList();
-
-                    var treeViewNode = new TreeViewNode()
-                    {
-                        ShowItem = item,
-                        ItemTemplate = this.ItemTemplate,
-                        ItemsSource = this.ItemsSource
-                    };
-                    treeViewNode.grdItem.RowDefinitions[0].Height = this.grdItem.RowDefinitions[0].Height;
-                    treeViewNode.SelectedItemChanged += this.SelectedItemChanged;
-                    if (item.SelectionMode == Enums.TreeViewSelectionMode.Single)
-                        treeViewNode.rdo.IsChecked = item.IsSelected;
-                    if (item.SelectionMode == Enums.TreeViewSelectionMode.Multiple)
-                        treeViewNode.chk.IsChecked = item.IsSelected;
-                    ChildItems.Children.Add(treeViewNode);
-                }
-            }
-            else
-                ChildItems.Children.Clear();
-        }
-
+    protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
         base.OnPropertyChanged(propertyName);
+        if (propertyName == nameof(ItemTemplate))
+            UpdateTemplateVisibility();
     }
 
-    private void Button_Clicked(object sender, EventArgs e)
+    private void OnShowItemChanged()
     {
-        if (sender is not Button expandButton ||
-            expandButton.CommandParameter is not VerticalStackLayout childItems)
-            return;
-
-        IsExpanded = !IsExpanded;
+        UpdateTemplateVisibility();
+        SyncSelectionControls();
     }
 
-    private void CheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    private void UpdateTemplateVisibility()
     {
-        if (SelectedItemChanged is null || this.ItemsSource is null)
+        var hasTemplate = ItemTemplate is not null;
+        defaultTemplate.IsVisible = !hasTemplate;
+        customContent.IsVisible = hasTemplate;
+    }
+
+    private void SyncSelectionControls()
+    {
+        if (ShowItem is null)
             return;
 
-        this.ShowItem.IsSelected = e.Value;
-        var item = this.ItemsSource.FirstOrDefault(x => object.Equals(x.Id, this.ShowItem.Id));
-        if (item is not null)
-            item.IsSelected = e.Value;
-        SelectedItemChanged.Invoke(sender, this.ShowItem);
+        _suppressSelectionEvent = true;
+        try
+        {
+            chk.IsChecked = ShowItem.IsSelected;
+            rdo.IsChecked = ShowItem.IsSelected;
+        }
+        finally
+        {
+            _suppressSelectionEvent = false;
+        }
+    }
+
+    private void Expand_Clicked(object? sender, EventArgs e)
+    {
+        if (ShowItem is null || Owner is null)
+            return;
+
+        Owner.ToggleExpand(ShowItem);
+    }
+
+    private void Selection_CheckedChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        if (_suppressSelectionEvent || ShowItem is null || Owner is null)
+            return;
+
+        ShowItem.IsSelected = e.Value;
+        Owner.OnNodeSelectionChanged(ShowItem);
     }
 }

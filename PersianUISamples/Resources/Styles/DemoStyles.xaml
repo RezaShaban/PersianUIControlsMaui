@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="DemoAccent">#5B2BDF</Color>
+    <Color x:Key="DemoAccentSoft">#EEF0FF</Color>
+    <Color x:Key="DemoPageBgLight">#F4F6FB</Color>
+    <Color x:Key="DemoPageBgDark">#121212</Color>
+    <Color x:Key="DemoOnSurfaceLight">#121212</Color>
+    <Color x:Key="DemoOnSurfaceDark">#F2F2F2</Color>
+    <Color x:Key="DemoMutedLight">#666666</Color>
+    <Color x:Key="DemoMutedDark">#AAAAAA</Color>
+
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource DemoPageBgLight}, Dark={StaticResource DemoPageBgDark}}"/>
+        <Setter Property="Shell.NavBarIsVisible" Value="True"/>
+    </Style>
+
+    <Style x:Key="DemoPageTitle" TargetType="Label">
+        <Setter Property="FontFamily" Value="IranianSans"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DemoOnSurfaceLight}, Dark={StaticResource DemoOnSurfaceDark}}"/>
+    </Style>
+
+    <Style x:Key="DemoPageLead" TargetType="Label">
+        <Setter Property="FontFamily" Value="IranianSans"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Margin" Value="0,4,0,16"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DemoMutedLight}, Dark={StaticResource DemoMutedDark}}"/>
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+    </Style>
+
+    <Style x:Key="DemoScroll" TargetType="ScrollView">
+        <Setter Property="Padding" Value="16,12"/>
+    </Style>
+</ResourceDictionary>

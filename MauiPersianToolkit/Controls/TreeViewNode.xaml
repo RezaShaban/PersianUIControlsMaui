@@ -2,44 +2,59 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiPersianToolkit.Controls.TreeViewNode"
-             xmlns:conv="clr-namespace:MauiPersianToolkit.Converters"
-             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls" x:DataType="controls:TreeView"
+             xmlns:controls="clr-namespace:MauiPersianToolkit.Controls"
+             x:DataType="controls:TreeViewNode"
              x:Name="treeViewNode">
-    <Grid RowDefinitions="32,Auto" ColumnDefinitions="32,Auto,100*" RowSpacing="5" x:Name="grdItem">
-        <Button Text="&#xf078;" FontFamily="FontAwesome" WidthRequest="32" HeightRequest="32" BackgroundColor="Transparent"
-                BorderWidth="0" BorderColor="BlueViolet" TextColor="Black" ContentLayout="Right,0" Padding="1"
-                CommandParameter="{x:Reference ChildItems}" Clicked="Button_Clicked" Grid.Column="0" Grid.Row="0" IsVisible="True">
+    <Grid x:Name="grdItem"
+          Margin="{Binding ShowItem.IndentMargin, Source={x:Reference treeViewNode}}"
+          ColumnDefinitions="32,Auto,*"
+          ColumnSpacing="0"
+          HeightRequest="{Binding ItemHeight, Source={x:Reference treeViewNode}}">
+
+        <Button Text="&#xf078;" FontFamily="FontAwesome" WidthRequest="32" HeightRequest="32"
+                BackgroundColor="Transparent" BorderWidth="0" Padding="1"
+                TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                Clicked="Expand_Clicked" Grid.Column="0"
+                IsVisible="{Binding ShowItem.HasChildren, Source={x:Reference treeViewNode}}">
             <Button.Triggers>
-                <DataTrigger TargetType="Button" Binding="{Binding ShowItem.ChildItems.Count,Source={x:Reference treeViewNode}}" Value="0">
-                    <Setter Property="IsVisible" Value="False"/>
-                </DataTrigger>
-                <DataTrigger TargetType="Button" Binding="{Binding IsExpanded,Source={x:Reference treeViewNode}}" Value="False">
+                <DataTrigger TargetType="Button"
+                             Binding="{Binding ShowItem.IsExpanded, Source={x:Reference treeViewNode}}"
+                             Value="False">
                     <Setter Property="Text" Value="&#xf053;"/>
                 </DataTrigger>
             </Button.Triggers>
         </Button>
-        <CheckBox Grid.Row="0" Grid.Column="1" WidthRequest="32" IsVisible="False" CheckedChanged="CheckBox_CheckedChanged"
-                  x:Name="chk">
+
+        <CheckBox Grid.Column="1" WidthRequest="32" x:Name="chk"
+                  IsVisible="False" CheckedChanged="Selection_CheckedChanged">
             <CheckBox.Triggers>
-                <DataTrigger TargetType="CheckBox" Binding="{Binding ShowItem.SelectionMode,Source={x:Reference treeViewNode}}" Value="2">
+                <DataTrigger TargetType="CheckBox"
+                             Binding="{Binding ShowItem.SelectionMode, Source={x:Reference treeViewNode}}"
+                             Value="2">
                     <Setter Property="IsVisible" Value="True"/>
                 </DataTrigger>
             </CheckBox.Triggers>
         </CheckBox>
-        <RadioButton Grid.Row="0" Grid.Column="1" Shell.UnselectedColor="DarkBlue" WidthRequest="32" HeightRequest="32"
-                     IsVisible="False" GroupName="tree" BackgroundColor="Transparent" CheckedChanged="CheckBox_CheckedChanged"
-                     x:Name="rdo" FontFamily="IranianSans">
+
+        <RadioButton Grid.Column="1" WidthRequest="32" HeightRequest="32" x:Name="rdo"
+                     GroupName="tree" BackgroundColor="Transparent" IsVisible="False"
+                     CheckedChanged="Selection_CheckedChanged" FontFamily="IranianSans">
             <RadioButton.Triggers>
-                <DataTrigger TargetType="RadioButton" Binding="{Binding ShowItem.SelectionMode,Source={x:Reference treeViewNode}}" Value="1">
+                <DataTrigger TargetType="RadioButton"
+                             Binding="{Binding ShowItem.SelectionMode, Source={x:Reference treeViewNode}}"
+                             Value="1">
                     <Setter Property="IsVisible" Value="True"/>
                 </DataTrigger>
             </RadioButton.Triggers>
         </RadioButton>
-        <ContentView Grid.Column="2" Margin="10,0,0,0" Grid.Row="0" BindingContext="{Binding ShowItem.OriginalItem,Source={x:Reference treeViewNode}}" ControlTemplate="{Binding ItemTemplate,Source={x:Reference treeViewNode}}"/>
 
-        <Label Text="{Binding Title}" BindingContext="{Binding ShowItem,Source={x:Reference treeViewNode}}" VerticalOptions="Center" TextColor="Black"
-               FontFamily="IranianSans" Margin="10,0,0,0" Grid.Column="2" Grid.Row="0" IsVisible="True" x:Name="defaultTemplate"/>
+        <ContentView x:Name="customContent" Grid.Column="2" Margin="10,0,0,0"
+                     BindingContext="{Binding ShowItem.OriginalItem, Source={x:Reference treeViewNode}}"
+                     ControlTemplate="{Binding ItemTemplate, Source={x:Reference treeViewNode}}"/>
 
-        <VerticalStackLayout x:Name="ChildItems" Grid.Row="1" Grid.Column="1" Spacing="5" Grid.ColumnSpan="2"/>
+        <Label Grid.Column="2" Margin="10,0,0,0" VerticalOptions="Center" FontFamily="IranianSans"
+               Text="{Binding ShowItem.Title, Source={x:Reference treeViewNode}}"
+               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+               x:Name="defaultTemplate"/>
     </Grid>
 </ContentView>

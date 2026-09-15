@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using MauiPersianToolkit.Controls;
 using MauiPersianToolkit.Models;
 
 namespace MauiPersianToolkit.Dialogs;
@@ -38,21 +38,4 @@ public partial class ConfirmPage : Popup
         config.OnAction?.Invoke(true);
         await this.CloseAsync();
     }
-
-    //private void MeasureText(string message)
-    //{
-    //    locEditor.MaximumWidthRequest = container.MaximumWidthRequest;
-    //    locEditor.Text = message;
-    //    locEditor.FontFamily = "IranianSans";
-    //    var locSize = locEditor.Handler.GetDesiredSize(double.PositiveInfinity, double.PositiveInfinity);
-
-    //    scrollView.HeightRequest = locSize.Height+50;
-    //    container.Children.Remove(locEditor);
-    //    grdBody.HeightRequest = locSize.Height + 190;
-    //}
-
-    //private void Popup_HandlerChanged(object sender, EventArgs e)
-    //{
-    //    MeasureText(config.Message);
-    //}
 }

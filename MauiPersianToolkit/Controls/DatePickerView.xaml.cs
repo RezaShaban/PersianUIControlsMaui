@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Maui.Views;
-using MauiPersianToolkit.Models;
+﻿using MauiPersianToolkit.Models;
 using MauiPersianToolkit.ViewModels;
 using System.Runtime.CompilerServices;
 
@@ -14,8 +13,8 @@ public partial class DatePickerView : Popup
     #region Properties
 
     public static readonly BindableProperty CalendarOptionProperty = BindableProperty.Create(
-        nameof(CalendarOption), typeof(CalendarOptions), typeof(DatePicker),
-        new CalendarOptions(), BindingMode.TwoWay);
+        nameof(CalendarOption), typeof(CalendarOptions), typeof(DatePickerView),
+        defaultValueCreator: static _ => new CalendarOptions());
     public CalendarOptions CalendarOption
     {
         get => (CalendarOptions)GetValue(CalendarOptionProperty);
@@ -28,30 +27,44 @@ public partial class DatePickerView : Popup
     public DatePickerView()
     {
         InitializeComponent();
+        WireButtons();
     }
 
     public DatePickerView(CalendarOptions options)
     {
         InitializeComponent();
+        WireButtons();
         InitializeView(options);
     }
 
-    private void InitializeView(CalendarOptions options)
+    /// <summary>
+    /// Refreshes calendar state for a reused popup instance without rebuilding XAML.
+    /// </summary>
+    public void Prepare(CalendarOptions options)
     {
-        try
+        if (_viewModel is null)
         {
-            btnAccept.Clicked += BtnAccept_Clicked;
-            btnCancel.Clicked += BtnCancel_Clicked;
-
             _viewModel = new DatePickerViewModel(options);
-            this.BindingContext = _viewModel;
+            BindingContext = _viewModel;
         }
-        catch (Exception ex)
+        else
         {
-            System.Diagnostics.Debug.WriteLine($"Error initializing DatePickerView: {ex.Message}");
-            throw;
+            _viewModel.Refresh(options);
         }
+
+        if (!ReferenceEquals(CalendarOption, options))
+            SetValue(CalendarOptionProperty, options);
     }
+
+    private void WireButtons()
+    {
+        btnAccept.Clicked -= BtnAccept_Clicked;
+        btnCancel.Clicked -= BtnCancel_Clicked;
+        btnAccept.Clicked += BtnAccept_Clicked;
+        btnCancel.Clicked += BtnCancel_Clicked;
+    }
+
+    private void InitializeView(CalendarOptions options) => Prepare(options);
 
     private async void BtnDay_Clicked(object sender, EventArgs e)
     {
@@ -75,6 +88,9 @@ public partial class DatePickerView : Popup
 
     private async void BtnAccept_Clicked(object sender, EventArgs e)
     {
+        if (!_viewModel.CanAccept)
+            return;
+
         var dates = _viewModel.SelectedDays.Where(x => x.IsSelected).ToList();
         _viewModel.Options.OnAccept?.Invoke(dates);
         await this.CloseAsync();
@@ -92,8 +108,11 @@ public partial class DatePickerView : Popup
 
         switch (propertyName)
         {
-            case nameof(CalendarOption):
-                InitializeView(CalendarOption);
+            case nameof(CalendarOption) when CalendarOption is not null:
+                if (_viewModel is null)
+                    Prepare(CalendarOption);
+                else if (!ReferenceEquals(_viewModel.Options, CalendarOption))
+                    _viewModel.Refresh(CalendarOption);
                 break;
         }
     }

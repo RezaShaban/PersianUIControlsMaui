@@ -1,22 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<mpt:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:mpt="http://schemas.mauipersiantoolkit.com/2026/toolkit"
                xmlns:uc="clr-namespace:MauiPersianToolkit.Controls"
-               xmlns:conv="clr-namespace:MauiPersianToolkit.Converters" 
                xmlns:models="clr-namespace:MauiPersianToolkit.Models"  x:DataType="models:CustomDialogConfig"
-               x:Class="MauiPersianToolkit.Dialogs.CustomDialogPage" BackgroundColor="Transparent" HorizontalOptions="Fill">
-    <!-- Content -->
+               x:Class="MauiPersianToolkit.Dialogs.CustomDialogPage" BackgroundColor="Transparent"
+               HorizontalOptions="Fill" VerticalOptions="Center">
     <Grid Padding="20" RowDefinitions="Auto" HorizontalOptions="Fill" FlowDirection="RightToLeft" x:Name="container">
         <Border HorizontalOptions="Fill" Padding="0" Margin="0,32,0,0" Background="{Binding BackgroundColor}">
             <Border.StrokeShape>
-                <RoundRectangle Fill="{Binding BackgroundColor}" CornerRadius="7" StrokeThickness="1" StrokeLineJoin="Round" Stroke="Gainsboro"/>
+                <RoundRectangle Fill="{Binding BackgroundColor}" CornerRadius="7" StrokeThickness="1"
+                                StrokeLineJoin="Round"
+                                Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"/>
             </Border.StrokeShape>
             <Grid Margin="0" ColumnDefinitions="100*" RowDefinitions="95,Auto,50" x:Name="grdBody" HorizontalOptions="Fill">
-                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Title,Mode=OneWay}" TextColor="Black" FontSize="Title" HorizontalOptions="Fill" VerticalOptions="Center" FontFamily="IranianSans" LineBreakMode="NoWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Margin="20,45,20,0" x:Name="lblTitle"/>
+                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Title,Mode=OneWay}"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                       FontSize="Title" HorizontalOptions="Fill" VerticalOptions="Center" FontFamily="IranianSans"
+                       LineBreakMode="NoWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                       Margin="20,45,20,0" x:Name="lblTitle"/>
                 <ScrollView Grid.Row="1" Grid.Column="0" MaximumHeightRequest="500" x:Name="scrollView" Padding="0">
-                    <StackLayout Padding="15,5" HorizontalOptions="Fill" VerticalOptions="Fill">
-                        <Label Text="{Binding Message}" FontSize="Body" Margin="0,0,0,10" LineHeight="1.25" x:Name="lblMessage" IsVisible="True" FontFamily="IranianSans" TextColor="Black">
+                    <StackLayout Padding="0" HorizontalOptions="Fill" VerticalOptions="Fill">
+                        <Label Text="{Binding Message}" FontSize="Body" Margin="0,0,0,10" Padding="15,5"
+                               LineHeight="1.25" x:Name="lblMessage" IsVisible="True"
+                               FontFamily="IranianSans"
+                               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                               HorizontalOptions="Fill" LineBreakMode="WordWrap">
                             <Label.Triggers>
                                 <DataTrigger Binding="{Binding Message}" Value="" TargetType="Label">
                                     <Setter Property="IsVisible" Value="False"/>
@@ -24,27 +33,37 @@
                             </Label.Triggers>
                         </Label>
 
-                        <ContentView Content="{Binding Content}"/>
+                        <ContentView Content="{Binding Content}" Padding="15,5" HorizontalOptions="Fill"/>
                     </StackLayout>
                 </ScrollView>
-                <Grid BackgroundColor="#f5f5f5" VerticalOptions="End" ColumnDefinitions="50*,50*" RowDefinitions="45" Margin="0,0,0,0" Grid.Row="2">
-                    <uc:ButtonView Text="{Binding AcceptText}" BtnMargin="0" CornerRadius="0" BtnBgColor="#f5f5f5" Icon="{Binding AcceptFontIcon}" IconColor="#1f883d" TextColor="#1f883d" Clicked="btnAccept_Clicked" Grid.Column="0">
+                <Grid BackgroundColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                      VerticalOptions="End" ColumnDefinitions="50*,50*" RowDefinitions="45" Grid.Row="2">
+                    <uc:ButtonView Text="{Binding AcceptText}" BtnMargin="0" CornerRadius="0"
+                                   BtnBgColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                                   Icon="{Binding AcceptFontIcon}" IconColor="{StaticResource PdtAccept}"
+                                   TextColor="{StaticResource PdtAccept}" Clicked="btnAccept_Clicked" Grid.Column="0">
                         <uc:ButtonView.Triggers>
                             <DataTrigger TargetType="uc:ButtonView" Binding="{Binding Cancelable}" Value="False">
                                 <Setter Property="AbsoluteLayout.LayoutBounds" Value="0,0,1,45"/>
                             </DataTrigger>
                         </uc:ButtonView.Triggers>
                     </uc:ButtonView>
-                    <uc:ButtonView Text="{Binding CancelText}" TextColor="OrangeRed" CornerRadius="0" BtnMargin="0" Icon="{Binding CancelFontIcon}" BtnBgColor="#f5f5f5" IconColor="OrangeRed" Clicked="btnCancel_Clicked" IsVisible="{Binding Cancelable}" Grid.Column="1"/>
+                    <uc:ButtonView Text="{Binding CancelText}" TextColor="{StaticResource PdtCancel}" CornerRadius="0"
+                                   BtnMargin="0" Icon="{Binding CancelFontIcon}"
+                                   BtnBgColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}"
+                                   IconColor="{StaticResource PdtCancel}" Clicked="btnCancel_Clicked"
+                                   IsVisible="{Binding Cancelable}" Grid.Column="1"/>
                 </Grid>
             </Grid>
         </Border>
         <Border Padding="0" WidthRequest="72" HeightRequest="72" VerticalOptions="Start" HorizontalOptions="Center">
             <Border.StrokeShape>
-                <RoundRectangle Fill="Transparent" CornerRadius="100" StrokeThickness="1" StrokeLineJoin="Round" Stroke="Transparent"/>
+                <RoundRectangle Fill="Transparent" CornerRadius="100" StrokeThickness="1"
+                                StrokeLineJoin="Round" Stroke="Transparent"/>
             </Border.StrokeShape>
-            <Button WidthRequest="72" HeightRequest="72" FontSize="32" TextColor="White" Text="{Binding FontIcon}" BorderWidth="3" InputTransparent="True" BorderColor="{Binding BackgroundColor}" Padding="0" CornerRadius="100" BackgroundColor="{Binding DialogColor}" FontFamily="FontAwesome"/>
+            <Button WidthRequest="72" HeightRequest="72" FontSize="32" TextColor="White" Text="{Binding FontIcon}"
+                    BorderWidth="3" InputTransparent="True" BorderColor="{Binding BackgroundColor}" Padding="0"
+                    CornerRadius="100" BackgroundColor="{Binding DialogColor}" FontFamily="FontAwesome"/>
         </Border>
-        <!--<Editor Opacity="0" x:Name="locEditor" AutoSize="TextChanges"/>-->
     </Grid>
-</toolkit:Popup>
+</mpt:Popup>

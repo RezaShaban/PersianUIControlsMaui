@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.DateTimePage"
+             x:DataType="vm:DateTimeGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="{Binding PageTitle}" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding HijriTitle}" Hint="{Binding HijriHint}">
+                <pui:DatePicker PlaceHolder="{Binding HijriPlaceholder}"
+                                DisplayFormat="yyyy/MM/dd"
+                                Icon="&#xf073;"
+                                SelectedPersianDate="{Binding SingleDate}"
+                                CalendarOption="{Binding HijriSingle}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding RangeTitle}" Hint="{Binding RangeHint}">
+                <pui:DatePicker PlaceHolder="{Binding RangePlaceholder}"
+                                DisplayFormat="yyyy/MM/dd"
+                                Icon="&#xf073;"
+                                SelectedPersianDate="{Binding RangeDate}"
+                                CalendarOption="{Binding PersianRange}"
+                                BadgeDates="{Binding RangeBadges}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding MultiTitle}" Hint="{Binding MultiHint}">
+                <pui:DatePicker PlaceHolder="{Binding MultiPlaceholder}"
+                                DisplayFormat="yyyy/MM/dd"
+                                Icon="&#xf073;"
+                                SelectedPersianDate="{Binding MultiDate}"
+                                CalendarOption="{Binding GregorianMulti}"
+                                BadgeDates="{Binding MultiBadges}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding Time24Title}" Hint="{Binding Time24Hint}">
+                <pui:TimePicker PlaceHolder="{Binding Time24Placeholder}"
+                                Icon="&#xf017;"
+                                SelectedTime="{Binding MeetingTime}"
+                                DisplayFormat="HH:mm"
+                                Is24Hour="True"
+                                MinuteInterval="5"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding Time12Title}" Hint="{Binding Time12Hint}">
+                <pui:TimePicker PlaceHolder="{Binding Time12Placeholder}"
+                                Icon="&#xf017;"
+                                SelectedTime="{Binding AlarmTime}"
+                                DisplayFormat="hh:mm:ss tt"
+                                Is24Hour="False"
+                                ShowSeconds="True"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding DateViewTitle}" Hint="{Binding DateViewHint}">
+                <pui:DatePickerView CalendarOption="{Binding HijriSingle}" HeightRequest="360"/>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

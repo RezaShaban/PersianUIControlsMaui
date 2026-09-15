@@ -1,8 +1,9 @@
-﻿using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Extensions;
-using CommunityToolkit.Maui.Views;
+﻿using MauiPersianToolkit.Core;
+using MauiPersianToolkit.Extensions;
+using MauiPersianToolkit.Localization;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static Microsoft.Maui.Controls.VisualStateManager;
@@ -10,512 +11,550 @@ using static Microsoft.Maui.Controls.VisualStateManager;
 namespace MauiPersianToolkit.Controls;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class PickerView : ContentView
+public partial class PickerView : PersianInputBase
 {
-    #region Propertie's
+    #region Fields
+
+    private Page? _hostPage;
+    private Popup? _sheet;
+    private CollectionView? _itemsList;
+    private Label? _titleLabel;
+    private Grid? _buttonLayout;
+    private Button? _cancelButton;
+    private Button? _acceptButton;
+    private HorizontalStackLayout? _titleLayout;
+    private bool _isShowing;
+    private bool _sheetBuilt;
+    private PropertyInfo? _displayPropertyInfo;
+    private PropertyInfo? _valuePropertyInfo;
+    private Type? _displayPropertyType;
+    private Type? _valuePropertyType;
+    private string? _cachedDisplayPropertyName;
+    private string? _cachedValueMemberName;
+
+    #endregion
+
+    #region Properties
 
     public static readonly BindableProperty TitleProperty = BindableProperty.Create(nameof(Title), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string Title
     {
-        get { return (string)GetValue(TitleProperty); }
-        set { SetValue(TitleProperty, value); }
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
     }
 
     public static readonly BindableProperty SelectedItemColorProperty = BindableProperty.Create(nameof(SelectedItemColor), typeof(Color), typeof(PickerView), Colors.Orange, BindingMode.TwoWay);
     public Color SelectedItemColor
     {
-        get { return (Color)GetValue(SelectedItemColorProperty); }
-        set { SetValue(SelectedItemColorProperty, value); }
+        get => (Color)GetValue(SelectedItemColorProperty);
+        set => SetValue(SelectedItemColorProperty, value);
     }
 
     public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string Text
     {
-        get { return (string)GetValue(TextProperty); }
-        set { SetValue(TextProperty, value); }
+        get => (string)GetValue(TextProperty);
+        set => SetValue(TextProperty, value);
     }
 
-    public static readonly BindableProperty CancelTextProperty = BindableProperty.Create(nameof(CancelText), typeof(string), typeof(PickerView), "انصراف", BindingMode.TwoWay);
+    public static readonly BindableProperty CancelTextProperty = BindableProperty.Create(
+        nameof(CancelText), typeof(string), typeof(PickerView), null, BindingMode.TwoWay,
+        defaultValueCreator: static _ => PersianToolkitStrings.Cancel);
     public string CancelText
     {
-        get { return (string)GetValue(CancelTextProperty); }
-        set { SetValue(CancelTextProperty, value); }
+        get => (string)GetValue(CancelTextProperty);
+        set => SetValue(CancelTextProperty, value);
     }
 
-    public static readonly BindableProperty AcceptTextProperty = BindableProperty.Create(nameof(AcceptText), typeof(string), typeof(PickerView), "تایید", BindingMode.TwoWay);
+    public static readonly BindableProperty AcceptTextProperty = BindableProperty.Create(
+        nameof(AcceptText), typeof(string), typeof(PickerView), null, BindingMode.TwoWay,
+        defaultValueCreator: static _ => PersianToolkitStrings.Confirm);
     public string AcceptText
     {
-        get { return (string)GetValue(AcceptTextProperty); }
-        set { SetValue(AcceptTextProperty, value); }
+        get => (string)GetValue(AcceptTextProperty);
+        set => SetValue(AcceptTextProperty, value);
     }
 
     public static readonly BindableProperty SelectionModeProperty = BindableProperty.Create(nameof(SelectionMode), typeof(SelectionMode), typeof(PickerView), SelectionMode.Single, BindingMode.TwoWay);
     public SelectionMode SelectionMode
     {
-        get { return (SelectionMode)GetValue(SelectionModeProperty); }
-        set { SetValue(SelectionModeProperty, value); }
-    }
-
-    public static readonly BindableProperty PlaceHolderColorProperty = BindableProperty.Create(nameof(PlaceHolderColor), typeof(Color), typeof(PickerView), Colors.Gray, BindingMode.TwoWay);
-    public Color PlaceHolderColor
-    {
-        get { return (Color)GetValue(PlaceHolderColorProperty); }
-        set { SetValue(PlaceHolderColorProperty, value); }
-    }
-
-    public static readonly BindableProperty ActivePlaceHolderColorProperty = BindableProperty.Create(nameof(ActivePlaceHolderColor), typeof(Color), typeof(PickerView), Colors.Gray, BindingMode.TwoWay);
-    public Color ActivePlaceHolderColor
-    {
-        get { return (Color)GetValue(ActivePlaceHolderColorProperty); }
-        set { SetValue(ActivePlaceHolderColorProperty, value); }
-    }
-
-    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(PickerView), Colors.Black, BindingMode.TwoWay);
-    public Color TextColor
-    {
-        get { return (Color)GetValue(TextColorProperty); }
-        set { SetValue(TextColorProperty, value); }
-    }
-
-    public static readonly BindableProperty PlaceHolderProperty = BindableProperty.Create(nameof(PlaceHolder), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string PlaceHolder
-    {
-        get { return (string)GetValue(PlaceHolderProperty); }
-        set { SetValue(PlaceHolderProperty, value); }
+        get => (SelectionMode)GetValue(SelectionModeProperty);
+        set => SetValue(SelectionModeProperty, value);
     }
 
     public static readonly BindableProperty FontFamilyProperty = BindableProperty.Create(nameof(FontFamily), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string FontFamily
     {
-        get { return (string)GetValue(FontFamilyProperty); }
-        set { SetValue(FontFamilyProperty, value); }
-    }
-
-    public static readonly BindableProperty ErrorMessageProperty = BindableProperty.Create(nameof(ErrorMessage), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string ErrorMessage
-    {
-        get { return (string)GetValue(ErrorMessageProperty); }
-        set { SetValue(ErrorMessageProperty, value); }
-    }
-
-    public static readonly BindableProperty IsValidProperty = BindableProperty.Create(nameof(IsValid), typeof(bool), typeof(PickerView), default(bool), BindingMode.TwoWay);
-    public bool IsValid
-    {
-        get { return (bool)GetValue(IsValidProperty); }
-        set { SetValue(IsValidProperty, value); }
-    }
-
-    public static readonly BindableProperty IconProperty = BindableProperty.Create(nameof(Icon), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string Icon
-    {
-        get { return (string)GetValue(IconProperty); }
-        set { SetValue(IconProperty, value); }
+        get => (string)GetValue(FontFamilyProperty);
+        set => SetValue(FontFamilyProperty, value);
     }
 
     public static readonly BindableProperty SelectionChangedCommandProperty = BindableProperty.Create(nameof(SelectionChangedCommand), typeof(Command), typeof(PickerView), default(Command), BindingMode.TwoWay);
     public Command SelectionChangedCommand
     {
-        get { return (Command)GetValue(SelectionChangedCommandProperty); }
-        set { SetValue(SelectionChangedCommandProperty, value); }
+        get => (Command)GetValue(SelectionChangedCommandProperty);
+        set => SetValue(SelectionChangedCommandProperty, value);
     }
 
     public static readonly BindableProperty SelectionChangedCommandParameterProperty = BindableProperty.Create(nameof(SelectionChangedCommandParameter), typeof(object), typeof(PickerView), null, BindingMode.TwoWay);
     public object SelectionChangedCommandParameter
     {
-        get { return (object)GetValue(SelectionChangedCommandParameterProperty); }
-        set { SetValue(SelectionChangedCommandParameterProperty, value); }
+        get => GetValue(SelectionChangedCommandParameterProperty);
+        set => SetValue(SelectionChangedCommandParameterProperty, value);
     }
 
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList), typeof(PickerView), default(IList), BindingMode.TwoWay);
     public IList ItemsSource
     {
-        get { return (IList)GetValue(ItemsSourceProperty); }
-        set { SetValue(ItemsSourceProperty, value); }
+        get => (IList)GetValue(ItemsSourceProperty);
+        set => SetValue(ItemsSourceProperty, value);
     }
 
-    public static readonly BindableProperty AdditionButtonsProperty = BindableProperty.Create(nameof(AdditionButtons), typeof(IList<PickerButton>), typeof(PickerView), new List<PickerButton>(), BindingMode.TwoWay);
+    public static readonly BindableProperty AdditionButtonsProperty = BindableProperty.Create(
+        nameof(AdditionButtons), typeof(IList<PickerButton>), typeof(PickerView),
+        defaultValueCreator: static _ => new List<PickerButton>());
     public IList<PickerButton> AdditionButtons
     {
-        get { return (IList<PickerButton>)GetValue(AdditionButtonsProperty); }
-        set { SetValue(AdditionButtonsProperty, value); }
+        get => (IList<PickerButton>)GetValue(AdditionButtonsProperty);
+        set => SetValue(AdditionButtonsProperty, value);
     }
 
     public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(PickerView), default(DataTemplate), BindingMode.TwoWay);
     public DataTemplate ItemTemplate
     {
-        get { return (DataTemplate)GetValue(ItemTemplateProperty); }
-        set { SetValue(ItemTemplateProperty, value); }
+        get => (DataTemplate)GetValue(ItemTemplateProperty);
+        set => SetValue(ItemTemplateProperty, value);
     }
 
     public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(PickerView), default(object), BindingMode.TwoWay);
     public object SelectedItem
     {
-        get { return (object)GetValue(SelectedItemProperty); }
-        set { SetValue(SelectedItemProperty, value); }
+        get => GetValue(SelectedItemProperty);
+        set => SetValue(SelectedItemProperty, value);
     }
 
     public static readonly BindableProperty SelectedValueProperty = BindableProperty.Create(nameof(SelectedValue), typeof(object), typeof(PickerView), default(object), BindingMode.TwoWay);
     public object SelectedValue
     {
-        get { return (object)GetValue(SelectedValueProperty); }
-        set { SetValue(SelectedValueProperty, value); }
+        get => GetValue(SelectedValueProperty);
+        set => SetValue(SelectedValueProperty, value);
     }
 
-    public static readonly BindableProperty SelectedItemsProperty = BindableProperty.Create(nameof(SelectedItems), typeof(ObservableCollection<object>), typeof(PickerView), new ObservableCollection<object>(), BindingMode.TwoWay);
+    public static readonly BindableProperty SelectedItemsProperty = BindableProperty.Create(
+        nameof(SelectedItems), typeof(ObservableCollection<object>), typeof(PickerView),
+        defaultValueCreator: static _ => new ObservableCollection<object>());
     public ObservableCollection<object> SelectedItems
     {
-        get { return (ObservableCollection<object>)GetValue(SelectedItemsProperty); }
-        set { SetValue(SelectedItemsProperty, value); }
+        get => (ObservableCollection<object>)GetValue(SelectedItemsProperty);
+        set => SetValue(SelectedItemsProperty, value);
     }
 
-    public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(PickerView), null, BindingMode.TwoWay);
+    public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(PickerView), -1, BindingMode.TwoWay);
     public int SelectedIndex
     {
-        get { return (int)GetValue(SelectedIndexProperty); }
-        set { SetValue(SelectedIndexProperty, value); }
+        get => (int)GetValue(SelectedIndexProperty);
+        set => SetValue(SelectedIndexProperty, value);
     }
 
     public static readonly BindableProperty DisplayPropertyProperty = BindableProperty.Create(nameof(DisplayProperty), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string DisplayProperty
     {
-        get { return (string)GetValue(DisplayPropertyProperty); }
-        set { SetValue(DisplayPropertyProperty, value); }
+        get => (string)GetValue(DisplayPropertyProperty);
+        set => SetValue(DisplayPropertyProperty, value);
     }
 
     public static readonly BindableProperty ValueMemberProperty = BindableProperty.Create(nameof(ValueMember), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string ValueMember
     {
-        get { return (string)GetValue(ValueMemberProperty); }
-        set { SetValue(ValueMemberProperty, value); }
+        get => (string)GetValue(ValueMemberProperty);
+        set => SetValue(ValueMemberProperty, value);
     }
 
     public static readonly BindableProperty RowIconPropertyProperty = BindableProperty.Create(nameof(RowIconProperty), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
     public string RowIconProperty
     {
-        get { return (string)GetValue(RowIconPropertyProperty); }
-        set { SetValue(RowIconPropertyProperty, value); }
+        get => (string)GetValue(RowIconPropertyProperty);
+        set => SetValue(RowIconPropertyProperty, value);
     }
-
-    //public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(nameof(CornerRadius), typeof(int), typeof(PickerView), default(int), BindingMode.TwoWay);
-    //public int CornerRadius
-    //{
-    //    get { return (int)GetValue(CornerRadiusProperty); }
-    //    set { SetValue(CornerRadiusProperty, value); }
-    //}
 
     public static readonly BindableProperty AcceptCommandProperty = BindableProperty.Create(nameof(AcceptCommand), typeof(Command), typeof(PickerView), default(Command), BindingMode.TwoWay);
     public Command AcceptCommand
     {
-        get { return (Command)GetValue(AcceptCommandProperty); }
-        set { SetValue(AcceptCommandProperty, value); }
+        get => (Command)GetValue(AcceptCommandProperty);
+        set => SetValue(AcceptCommandProperty, value);
     }
 
     public static readonly BindableProperty OnOpenCommandProperty = BindableProperty.Create(nameof(OnOpenCommand), typeof(Command), typeof(PickerView), default(Command), BindingMode.TwoWay);
-
     public Command OnOpenCommand
     {
-        get { return (Command)GetValue(OnOpenCommandProperty); }
-        set { SetValue(OnOpenCommandProperty, value); }
+        get => (Command)GetValue(OnOpenCommandProperty);
+        set => SetValue(OnOpenCommandProperty, value);
     }
+
     #endregion
 
-    public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
-    Page mainPage;
+    public event EventHandler<SelectionChangedEventArgs>? SelectionChanged;
 
     public PickerView()
     {
         InitializeComponent();
+        AttachInputChrome(outline);
 
-        var tapped = new TapGestureRecognizer();
-        tapped.Command = new Command(TapGestureRecognizer_Tapped);
+        var tapped = new TapGestureRecognizer
+        {
+            Command = new Command(OpenSheet)
+        };
         grdPattern.GestureRecognizers.Add(tapped);
     }
 
-    #region Event's
-
-    protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         base.OnPropertyChanged(propertyName);
 
         if (propertyName == IsEnabledProperty.PropertyName)
-            PlaceHolderColor = this.IsEnabled ? PlaceHolderColor : Colors.Gray;
+            PlaceHolderColor = IsEnabled ? PlaceHolderColor : Colors.Gray;
 
         if (propertyName == IconProperty.PropertyName)
             lblIcon.IsVisible = !string.IsNullOrEmpty(Icon);
 
-        if (propertyName == SelectedIndexProperty.PropertyName)
-            if (ItemsSource != null && ItemsSource.Count > SelectedIndex && SelectedIndex >= 0)
-                SelectedItem = ItemsSource[SelectedIndex];
+        if (propertyName == SelectedIndexProperty.PropertyName
+            && ItemsSource is not null
+            && SelectedIndex >= 0
+            && SelectedIndex < ItemsSource.Count)
+        {
+            SelectedItem = ItemsSource[SelectedIndex];
+        }
 
-        if (propertyName == SelectedValueProperty.PropertyName && ItemsSource != null && !string.IsNullOrEmpty(ValueMember) && SelectedValue != null)
+        if (propertyName == SelectedValueProperty.PropertyName
+            && ItemsSource is not null
+            && !string.IsNullOrEmpty(ValueMember)
+            && SelectedValue is not null)
+        {
             foreach (var item in ItemsSource)
             {
-                if (SelectedValue.Equals(item.GetType().GetProperty(ValueMember).GetValue(item)))
+                if (SelectedValue.Equals(GetValueMember(item)))
+                {
                     SelectedItem = item;
+                    break;
+                }
             }
+        }
+
+        if (propertyName == DisplayPropertyProperty.PropertyName)
+        {
+            _displayPropertyInfo = null;
+            _displayPropertyType = null;
+            _cachedDisplayPropertyName = null;
+        }
+
+        if (propertyName == ValueMemberProperty.PropertyName)
+        {
+            _valuePropertyInfo = null;
+            _valuePropertyType = null;
+            _cachedValueMemberName = null;
+        }
     }
 
-    private void TapGestureRecognizer_Tapped()
+    public void ShowDialog() => OpenSheet();
+
+    private async void OpenSheet()
     {
+        if (_isShowing)
+            return;
+
         OnOpenCommand?.Execute(null);
 
-        SetMainPage();
-        var popupPage = this.popupPage;
+        _hostPage ??= Application.Current?.Windows.FirstOrDefault()?.Page;
+        if (_hostPage is null)
+            return;
 
-        var ItemsList = this.GetListItems(popupPage);
+        EnsureSheet();
+        RefreshSheetContent();
 
-        //if (HasSearchbar)
-        //    ItemsList.Margin = new Thickness(0, 70, 0, 0);
-
-        #region Title Layout
-        var titleLayout = TitleLayout();
-        if (AdditionButtons != null)
+        _isShowing = true;
+        try
         {
-            foreach (var x in AdditionButtons)
-                titleLayout.Children.Add(x.ShallowCopy());
-
-            var hasWidth = AdditionButtons.Sum(x => x.WidthRequest);
-            var first = (Label)titleLayout.Children.FirstOrDefault();
-            first.WidthRequest = (DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density) - 45 - hasWidth;
+            await _hostPage.ShowPopupAsync(_sheet!, new PopupOptions { Shape = null, Shadow = null });
         }
-        #endregion
-
-        #region Buttons Layout
-
-        var buttonLayout = ButtonLayout;
-        if (SelectionMode == SelectionMode.Single)
-            buttonLayout.ColumnDefinitions.Clear();
-
-        popupPage.Content = new VerticalStackLayout()
+        catch (Exception ex)
         {
-#if ANDROID
-            WidthRequest = (DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density),
-#endif
-            BackgroundColor = Colors.White,
-            VerticalOptions = LayoutOptions.Fill,
-            HorizontalOptions = LayoutOptions.Fill,
-            Padding = new Thickness(15, 15, 15, 0),
-            Children =
-            {
-                titleLayout,
-                ItemsList,
-                buttonLayout
-            }
+            Debug.WriteLine($"PickerView.OpenSheet failed: {ex}");
+        }
+        finally
+        {
+            _isShowing = false;
+        }
+    }
+
+    private void EnsureSheet()
+    {
+        if (_sheetBuilt && _sheet is not null)
+            return;
+
+        _titleLabel = new Label
+        {
+            HorizontalOptions = LayoutOptions.Start,
+            HorizontalTextAlignment = TextAlignment.Start,
+            VerticalOptions = LayoutOptions.Center,
+            FontFamily = "IranianSans",
+            FontSize = 15,
+            TextColor = Colors.Gray,
+            Padding = new Thickness(15, 0)
         };
 
-        buttonLayout.Add(new Button()
+        _titleLayout = new HorizontalStackLayout
         {
-            Text = CancelText,
-            TextColor = Colors.OrangeRed,
+            HorizontalOptions = LayoutOptions.Fill,
+            Padding = new Thickness(0, 0, 0, 5),
+            FlowDirection = FlowDirection.RightToLeft,
+            Children = { _titleLabel }
+        };
+
+        _itemsList = new CollectionView
+        {
+            VerticalOptions = LayoutOptions.Fill,
+            HorizontalOptions = LayoutOptions.Fill,
+            HeightRequest = 300
+        };
+        _itemsList.SelectionChanged += OnItemsSelectionChanged;
+        EnsureSelectionVisualStates(_itemsList);
+
+        _cancelButton = new Button
+        {
+            TextColor = ThemeColors.Cancel,
             HorizontalOptions = LayoutOptions.Fill,
             BackgroundColor = Colors.Transparent,
             FontFamily = "IranianSans",
             Command = new Command(async () =>
             {
                 SelectedItems.Clear();
-                try { await popupPage.CloseAsync(); } catch { }
+                if (_sheet is not null)
+                    await _sheet.CloseAsync();
             })
-        }, SelectionMode == SelectionMode.Single ? 0 : 1, 0);
+        };
 
-        if (SelectionMode == SelectionMode.Multiple)
-            buttonLayout.Add(new Button()
+        _acceptButton = new Button
+        {
+            TextColor = ThemeColors.Accept,
+            HorizontalOptions = LayoutOptions.Fill,
+            BackgroundColor = Colors.Transparent,
+            FontFamily = "IranianSans",
+            Command = new Command(async () =>
             {
-                IsVisible = SelectionMode == SelectionMode.Multiple,
-                Text = AcceptText,
-                TextColor = Colors.Green,
-                HorizontalOptions = LayoutOptions.Fill,
-                BackgroundColor = Colors.Transparent,
-                FontFamily = "IranianSans",
-                Command = new Command(async () =>
-                {
-                    BindableLayout.SetItemsSource(hslSelecteItems, SelectedItems.Select(x => GetDisplayText(x)));
-                    AcceptCommand?.Execute(SelectedItems);
-                    await popupPage.CloseAsync();
-                })
-            }, 0, 0);
-        #endregion
+                BindableLayout.SetItemsSource(hslSelecteItems, SelectedItems.Select(GetDisplayText).ToList());
+                AcceptCommand?.Execute(SelectedItems);
+                if (_sheet is not null)
+                    await _sheet.CloseAsync();
+            })
+        };
 
-        try { this.mainPage.ShowPopupAsync(popupPage, new PopupOptions { Shape = null, Shadow = null }); } catch { }
-    }
-
-    private void SetMainPage()
-    {
-        if (mainPage is null)
-            mainPage = Application.Current.MainPage;
-    }
-
-    private Grid ButtonLayout => new()
-    {
-        BackgroundColor = Color.FromArgb("#f5f5f5"),
-        HorizontalOptions = LayoutOptions.Fill,
-        RowDefinitions = new RowDefinitionCollection()
+        _buttonLayout = new Grid
         {
-            new RowDefinition(){ Height = 50 }
-        },
-        ColumnDefinitions = new ColumnDefinitionCollection()
-        {
-            new ColumnDefinition(){ Width = new GridLength(50,GridUnitType.Star) },
-            new ColumnDefinition(){ Width = new GridLength(50,GridUnitType.Star) }
-        },
-    };
-
-    private HorizontalStackLayout TitleLayout() => new HorizontalStackLayout()
-    {
-        HorizontalOptions = LayoutOptions.Fill,
-        Padding = new Thickness(0, 0, 0, 5),
-        FlowDirection = FlowDirection.RightToLeft,
-        Children =
-        {
-            new Label()
+            BackgroundColor = ThemeColors.Footer,
+            HorizontalOptions = LayoutOptions.Fill,
+            RowDefinitions = new RowDefinitionCollection
             {
-                Text = string.IsNullOrEmpty(Title) ? PlaceHolder : Title,
-                HorizontalOptions = LayoutOptions.Start,
-                HorizontalTextAlignment = TextAlignment.Start,
-                VerticalOptions = LayoutOptions.Center,
-                FontFamily = "IranianSans",
-                FontSize = 15,
-                TextColor = Colors.Gray,
-                Padding = new Thickness(15, 0)
+                new RowDefinition { Height = 50 }
+            },
+            ColumnDefinitions = new ColumnDefinitionCollection
+            {
+                new ColumnDefinition { Width = new GridLength(50, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(50, GridUnitType.Star) }
             }
-        }
-    };
+        };
 
-    private Popup popupPage => new()
-    {
-        VerticalOptions = LayoutOptions.End,
-        HorizontalOptions = LayoutOptions.Fill,
-        BackgroundColor = Colors.Transparent,
-        Parent = null
-    };
-
-    #endregion
-
-    #region Method's
-
-    private CollectionView GetListItems(Popup popupPage)
-    {
-        try
+        _sheet = new Popup
         {
-            var list = new CollectionView()
+            VerticalOptions = LayoutOptions.End,
+            HorizontalOptions = LayoutOptions.Fill,
+            BackgroundColor = Colors.Transparent,
+            Content = new VerticalStackLayout
             {
+                BackgroundColor = ThemeColors.Surface,
                 VerticalOptions = LayoutOptions.Fill,
                 HorizontalOptions = LayoutOptions.Fill,
-                SelectionMode = SelectionMode,
-                HeightRequest = 300,
-                //ItemsLayout = new LinearItemsLayout(ItemsLayoutOrientation.Vertical)
-                //{
-                //    ItemSpacing = 0
-                //},
-                ItemsSource = this.ItemsSource,
-                SelectedItem = this.SelectedItem,
-                SelectedItems = this.SelectedItems,
-                ItemTemplate = ItemTemplate ?? DefaultItemTemplate
-            };
-
-            list.SelectionChanged += async (object sender, SelectionChangedEventArgs e) =>
-            {
-                if (((CollectionView)sender).SelectionMode == SelectionMode.Single)
+                Padding = new Thickness(15, 15, 15, 0),
+                Children =
                 {
-                    if (e.CurrentSelection.Count > 0)
-                        SelectedItem = e.CurrentSelection[0];
-                    if (SelectedItem == null)
-                        return;
-
-                    if (SelectionChanged != null)
-                        SelectionChanged.Invoke(this, e);
-                    if (SelectionChangedCommand != null)
-                        SelectionChangedCommand.Execute(SelectionChangedCommandParameter ?? SelectedItem);
-
-                    lblSelected.Text = GetDisplayText(SelectedItem);
-
-                    try { await popupPage.CloseAsync(); } catch { }
+                    _titleLayout,
+                    _itemsList,
+                    _buttonLayout
                 }
-            };
-
-            if (!list.Resources.Any(x => x.Key == "Microsoft.Maui.Controls.StackLayout"))
-            {
-                Setter backgroundColorSetter = new() { Property = BackgroundColorProperty, Value = SelectedItemColor };
-                VisualState stateSelected = new() { Name = CommonStates.Selected, Setters = { backgroundColorSetter } };
-                VisualState stateNormal = new() { Name = CommonStates.Normal };
-                VisualStateGroup visualStateGroup = new() { Name = nameof(CommonStates), States = { stateSelected, stateNormal } };
-                VisualStateGroupList visualStateGroupList = new() { visualStateGroup };
-                Setter vsgSetter = new() { Property = VisualStateGroupsProperty, Value = visualStateGroupList };
-                Style style = new(typeof(StackLayout)) { Setters = { vsgSetter }, BaseResourceKey = "collectionItem" };
-
-                // Add the style to the resource dictionary
-                list.Resources.Add(style);
             }
+        };
 
-            return list;
-        }
-        catch (Exception)
+        _sheetBuilt = true;
+    }
+
+    private void RefreshSheetContent()
+    {
+        if (_sheet is null || _itemsList is null || _titleLabel is null || _buttonLayout is null
+            || _cancelButton is null || _acceptButton is null || _titleLayout is null)
+            return;
+
+        // Re-assert bottom-sheet placement (must survive popup reuse).
+        _sheet.VerticalOptions = LayoutOptions.End;
+        _sheet.HorizontalOptions = LayoutOptions.Fill;
+        _sheet.BackgroundColor = Colors.Transparent;
+
+        _titleLabel.Text = string.IsNullOrEmpty(Title) ? PlaceHolder : Title;
+
+        // Reset extra title actions, keep the title label.
+        while (_titleLayout.Count > 1)
+            _titleLayout.RemoveAt(_titleLayout.Count - 1);
+
+        if (AdditionButtons is { Count: > 0 })
         {
-            return new CollectionView();
+            foreach (var button in AdditionButtons)
+                _titleLayout.Children.Add(button.ShallowCopy());
+
+            var occupiedWidth = AdditionButtons.Sum(x => x.WidthRequest);
+            _titleLabel.WidthRequest =
+                (DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density) - 45 - occupiedWidth;
         }
+        else
+        {
+            _titleLabel.ClearValue(WidthRequestProperty);
+        }
+
+        _itemsList.SelectionMode = SelectionMode;
+        _itemsList.ItemsSource = ItemsSource;
+        _itemsList.SelectedItem = SelectedItem;
+        _itemsList.SelectedItems = SelectedItems;
+        _itemsList.ItemTemplate = ItemTemplate ?? DefaultItemTemplate;
+
+        _cancelButton.Text = CancelText;
+        _acceptButton.Text = AcceptText;
+        _acceptButton.IsVisible = SelectionMode == SelectionMode.Multiple;
+
+        _buttonLayout.Children.Clear();
+        _buttonLayout.ColumnDefinitions.Clear();
+
+        if (SelectionMode == SelectionMode.Multiple)
+        {
+            _buttonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50, GridUnitType.Star) });
+            _buttonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50, GridUnitType.Star) });
+            _buttonLayout.Add(_acceptButton, 0, 0);
+            _buttonLayout.Add(_cancelButton, 1, 0);
+        }
+        else
+        {
+            _buttonLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+            _buttonLayout.Add(_cancelButton, 0, 0);
+        }
+    }
+
+    private async void OnItemsSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not CollectionView list || list.SelectionMode != SelectionMode.Single)
+            return;
+
+        if (e.CurrentSelection.Count > 0)
+            SelectedItem = e.CurrentSelection[0];
+
+        if (SelectedItem is null)
+            return;
+
+        SelectionChanged?.Invoke(this, e);
+        SelectionChangedCommand?.Execute(SelectionChangedCommandParameter ?? SelectedItem);
+        lblSelected.Text = GetDisplayText(SelectedItem);
+
+        if (_sheet is not null)
+            await _sheet.CloseAsync();
+    }
+
+    private void EnsureSelectionVisualStates(CollectionView list)
+    {
+        if (list.Resources.Any(x => x.Key == "Microsoft.Maui.Controls.StackLayout"))
+            return;
+
+        var backgroundColorSetter = new Setter { Property = BackgroundColorProperty, Value = SelectedItemColor };
+        var stateSelected = new VisualState { Name = CommonStates.Selected, Setters = { backgroundColorSetter } };
+        var stateNormal = new VisualState { Name = CommonStates.Normal };
+        var visualStateGroup = new VisualStateGroup { Name = nameof(CommonStates), States = { stateSelected, stateNormal } };
+        var visualStateGroupList = new VisualStateGroupList { visualStateGroup };
+        var vsgSetter = new Setter { Property = VisualStateGroupsProperty, Value = visualStateGroupList };
+        var style = new Style(typeof(StackLayout)) { Setters = { vsgSetter }, BaseResourceKey = "collectionItem" };
+        list.Resources.Add(style);
     }
 
     private DataTemplate DefaultItemTemplate => new(() =>
     {
-        var label = new LabelView()
+        var label = new LabelView
         {
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill,
             FontSize = 14,
             IconFontSize = 16,
-            TextColor = Colors.Black,
+            TextColor = ThemeColors.OnSurface,
             FlowDirection = FlowDirection.RightToLeft,
             InputTransparent = true,
             HorizontalTextAlignment = TextAlignment.Start
         };
+
         if (string.IsNullOrEmpty(DisplayProperty))
             label.SetBinding(LabelView.TextProperty, ".");
         else
             label.SetBinding(LabelView.TextProperty, DisplayProperty);
+
         if (!string.IsNullOrEmpty(RowIconProperty))
             label.SetBinding(LabelView.IconProperty, RowIconProperty);
         else
             label.Icon = "";
 
-        var rowLayout = new StackLayout()
+        return new StackLayout
         {
             HorizontalOptions = LayoutOptions.Fill,
             Padding = new Thickness(0, 10),
             Children = { label }
         };
-        return rowLayout;
     });
 
-    public void ShowDialog() => TapGestureRecognizer_Tapped();
-
-    #endregion
-
-    private PropertyInfo? _displayPropertyInfo;
-
-    private void UpdateDisplayPropertyInfo(object item)
+    private object? GetValueMember(object item)
     {
-        if (item == null)
-        {
-            _displayPropertyInfo = null;
-            return;
-        }
+        if (item is null || string.IsNullOrWhiteSpace(ValueMember))
+            return null;
 
-        _displayPropertyInfo =
-            item.GetType().GetProperty(DisplayProperty);
+        EnsureValuePropertyInfo(item);
+        return _valuePropertyInfo?.GetValue(item);
     }
 
-    private string GetDisplayText(object item)
+    private void EnsureValuePropertyInfo(object item)
     {
-        if (item == null)
-            return "";
+        var type = item.GetType();
+        if (_valuePropertyInfo is not null
+            && _valuePropertyType == type
+            && _cachedValueMemberName == ValueMember)
+            return;
+
+        _valuePropertyType = type;
+        _cachedValueMemberName = ValueMember;
+        _valuePropertyInfo = type.GetProperty(ValueMember);
+    }
+
+    private string GetDisplayText(object? item)
+    {
+        if (item is null)
+            return string.Empty;
 
         if (string.IsNullOrWhiteSpace(DisplayProperty))
-            return item.ToString();
+            return item.ToString() ?? string.Empty;
 
-        UpdateDisplayPropertyInfo(item);
+        EnsureDisplayPropertyInfo(item);
+        return _displayPropertyInfo?.GetValue(item)?.ToString() ?? string.Empty;
+    }
 
-        return _displayPropertyInfo?
-            .GetValue(item)?
-            .ToString() ?? "";
+    private void EnsureDisplayPropertyInfo(object item)
+    {
+        var type = item.GetType();
+        if (_displayPropertyInfo is not null
+            && _displayPropertyType == type
+            && _cachedDisplayPropertyName == DisplayProperty)
+            return;
+
+        _displayPropertyType = type;
+        _cachedDisplayPropertyName = DisplayProperty;
+        _displayPropertyInfo = type.GetProperty(DisplayProperty);
     }
 }
 
@@ -524,17 +563,14 @@ public class PickerButton : Button
     public PickerButton()
     {
         FontSize = 24;
-        BackgroundColor = Colors.White;
+        BackgroundColor = ThemeColors.Surface;
         HorizontalOptions = LayoutOptions.End;
         WidthRequest = 32;
         HeightRequest = 32;
         Padding = 0;
-        TextColor = Color.FromArgb("#666");
+        TextColor = ThemeColors.Muted;
         FontFamily = "FontAwesome";
     }
 
-    public PickerButton ShallowCopy()
-    {
-        return (PickerButton)this.MemberwiseClone();
-    }
+    public PickerButton ShallowCopy() => (PickerButton)MemberwiseClone();
 }

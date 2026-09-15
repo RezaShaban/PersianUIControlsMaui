@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using MauiPersianToolkit.Enums;
+﻿using MauiPersianToolkit.Enums;
 using MauiPersianToolkit.Services.Calendar;
 
 namespace MauiPersianToolkit;

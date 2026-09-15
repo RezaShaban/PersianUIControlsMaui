@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.InputsPage"
+             x:DataType="vm:InputsViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="{Binding PageTitle}" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding EntrySectionTitle}"
+                              Subtitle="{Binding EntrySectionSub}"
+                              Hint="{Binding EntrySectionHint}">
+                <pui:EntryView PlaceHolder="{Binding EntryPlaceholder}"
+                               Icon="&#xf007;"
+                               AppendText="@"
+                               Text="{Binding Name}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding EditorSectionTitle}"
+                              Subtitle="{Binding EditorSectionSub}"
+                              Hint="{Binding EditorSectionHint}">
+                <pui:EditorView Title="{Binding EditorTitle}"
+                                PlaceHolder="{Binding EditorPlaceholder}"
+                                Icon="&#xf075;"
+                                Text="{Binding Notes}"
+                                HeightRequest="120"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding LabelSectionTitle}" Hint="{Binding LabelSectionHint}">
+                <pui:LabelView Text="{Binding LabelSample}" Icon="&#xf075;"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding CheckSectionTitle}" Hint="{Binding CheckSectionHint}">
+                <pui:CheckBoxView Text="{Binding CheckAgree}"
+                                  IsChecked="{Binding Agree}"
+                                  TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding ButtonSectionTitle}" Hint="{Binding ButtonSectionHint}">
+                <pui:ButtonView Text="{Binding ButtonSave}"
+                                Icon="&#xf0c7;"
+                                Command="{Binding PrimaryCommand}"
+                                BtnBgColor="{StaticResource PdtAccent}"
+                                TextColor="White"
+                                IconColor="White"
+                                CornerRadius="10"
+                                HeightRequest="48"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding ToggleSectionTitle}" Hint="{Binding ToggleSectionHint}">
+                <HorizontalStackLayout Spacing="12">
+                    <pui:ToggleButton Checked="{Binding ToggleOn}" Animate="True"
+                                      WidthRequest="48" HeightRequest="48"/>
+                    <Label Text="{Binding ToggleStatusText}"
+                           FontFamily="IranianSans" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                </HorizontalStackLayout>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

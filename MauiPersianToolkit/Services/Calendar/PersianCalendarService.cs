@@ -144,13 +144,17 @@ public class PersianCalendarService : ICalendarService
     {
         try
         {
-            return typeof(PersianDayOfWeek).GetDisplay((int)dayOfWeek);
+            // PersianDayOfWeek is ordered Sat=0..Fri=6; System.DayOfWeek is Sun=0..Sat=6.
+            var persianIndex = ((int)dayOfWeek + 1) % 7;
+            return typeof(PersianDayOfWeek).GetDisplay(persianIndex);
         }
         catch
         {
             return string.Empty;
         }
     }
+
+    public DayOfWeek GetFirstDayOfWeek() => DayOfWeek.Saturday;
 
     public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Friday;
 

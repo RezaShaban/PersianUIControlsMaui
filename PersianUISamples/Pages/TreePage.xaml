@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:models="clr-namespace:PersianUISamples.Models"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.TreePage"
+             x:DataType="vm:TreeGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ContentPage.Resources>
+        <ControlTemplate x:Key="TreeNodeTemplate">
+            <Grid ColumnDefinitions="*,Auto" Padding="0,2">
+                <Label Text="{TemplateBinding BindingContext.Title}"
+                       FontFamily="IranianSans" VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+            </Grid>
+        </ControlTemplate>
+    </ContentPage.Resources>
+
+    <Grid Padding="16,12" RowDefinitions="Auto,Auto,*" RowSpacing="10">
+        <Label Text="TreeView" Style="{StaticResource DemoPageTitle}" Grid.Row="0"/>
+        <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}" Grid.Row="1" Margin="0"/>
+
+        <demo:DemoSection Grid.Row="2" Title="{Binding SectionTitle}" Hint="{Binding SectionHint}">
+            <Grid RowDefinitions="*,Auto" RowSpacing="8" HeightRequest="420">
+                <pui:TreeView Grid.Row="0"
+                              ItemsSource="{Binding Items}"
+                              SelectedItems="{Binding Selected}"
+                              KeyProperty="Id"
+                              ParentChildProperty="ParentId"
+                              DisplayProperty="Title"
+                              SelectionMode="Multiple"
+                              ItemHeight="36"
+                              ItemTemplate="{StaticResource TreeNodeTemplate}"/>
+
+                <VerticalStackLayout Grid.Row="1" Spacing="6">
+                    <Label Text="{Binding SelectedLabel}" FontFamily="IranianSans" FontAttributes="Bold" FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                    <ScrollView Orientation="Horizontal">
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Selected}" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:TreeNodeModel">
+                                    <Border StrokeThickness="0" Padding="10,6"
+                                            BackgroundColor="{StaticResource DemoAccentSoft}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="8"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Title}" FontFamily="IranianSans" FontSize="12"
+                                               TextColor="{StaticResource PdtAccent}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </VerticalStackLayout>
+            </Grid>
+        </demo:DemoSection>
+    </Grid>
+</ContentPage>

@@ -8,6 +8,9 @@
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<!-- Annotations only: lets new code use `?` without turning on nullability
+		     warnings for the pre-existing controls, which were never annotated. -->
+		<Nullable>annotations</Nullable>
 		<VersionPrefix>3.0.0</VersionPrefix>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -30,12 +33,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Controls\TimePicker.xaml.cs" />
 	  <Compile Remove="ViewModels\PickerViewModel.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiXaml Remove="Controls\TimePicker.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -51,7 +49,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 	</ItemGroup>
 
@@ -116,6 +113,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Dialogs\PromptPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\PersianColors.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Resources\Styles\PersianStyles.xaml">

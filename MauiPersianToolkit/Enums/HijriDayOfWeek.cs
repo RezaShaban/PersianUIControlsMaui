@@ -6,7 +6,7 @@ public enum HijriDayOfWeek
 {
     [Display(Name = "أحد")]
     Sunday,
-    [Display(Name = "اثن")]
+    [Display(Name = "إثن")]
     Monday,
     [Display(Name = "ثلا")]
     Tuesday,

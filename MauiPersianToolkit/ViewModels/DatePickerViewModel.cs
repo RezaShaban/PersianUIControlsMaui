@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Maui.Core.Extensions;
-using MauiPersianToolkit.Enums;
+﻿using MauiPersianToolkit.Enums;
+using MauiPersianToolkit.Extensions;
 using MauiPersianToolkit.Models;
 using MauiPersianToolkit.Services.Calendar;
 using System.Collections.ObjectModel;
@@ -11,6 +11,10 @@ public class DatePickerViewModel : ObservableObject
     #region Fields
 
     private ICalendarService _calendarService;
+    private ObservableCollection<PuiTuple>? _cachedYears;
+    private ObservableCollection<PuiTuple>? _cachedMonths;
+    private CalendarType? _yearsCacheType;
+    private CalendarType? _monthsCacheType;
 
     #endregion
 
@@ -38,7 +42,32 @@ public class DatePickerViewModel : ObservableObject
 
     public List<string> DaysOfWeek { get => daysOfWeek; set => SetProperty(ref daysOfWeek, value); }
     public List<DayOfMonth> DaysOfMonth { get => daysOfMonth; set => SetProperty(ref daysOfMonth, value); }
-    public ObservableCollection<DayOfMonth> SelectedDays { get => selectedDays; set => SetProperty(ref selectedDays, value); }
+    public ObservableCollection<DayOfMonth> SelectedDays
+    {
+        get => selectedDays;
+        set
+        {
+            if (selectedDays is not null)
+                selectedDays.CollectionChanged -= OnSelectedDaysChanged;
+
+            if (SetProperty(ref selectedDays, value) && selectedDays is not null)
+                selectedDays.CollectionChanged += OnSelectedDaysChanged;
+
+            OnPropertyChanged(nameof(CanAccept));
+        }
+    }
+
+    /// <summary>
+    /// Whether the confirm button may be pressed. Range selection needs both ends;
+    /// single and multiple need at least one day.
+    /// </summary>
+    public bool CanAccept => Options.SelectionMode switch
+    {
+        Enums.SelectionMode.Range => SelectedDays.Count == 2,
+        Enums.SelectionMode.Multiple => SelectedDays.Count > 0,
+        _ => SelectedDays.Count > 0
+    };
+
     public ObservableCollection<PuiTuple> PersianMonths { get => persianMonths; set => SetProperty(ref persianMonths, value); }
     public ObservableCollection<PuiTuple> PersianYears { get => persianYears; set => SetProperty(ref persianYears, value); }
 
@@ -46,31 +75,58 @@ public class DatePickerViewModel : ObservableObject
 
     #region Commands
 
-    public Command NextMonthCommand => new(NextMonth);
-    public Command PrevMonthCommand => new(PrevMonth);
-    public Command NextYearCommand => new(NextYear);
-    public Command PrevYearCommand => new(PrevYear);
-    public Command SwitchModeCommand => new(SwitchMode);
-    public Command SelectMonthCommand => new(SelectMonth);
-    public Command SelectYearCommand => new(SelectYear);
-    public Command GotoTodayCommand => new(GotoToday);
-    public Command InitCalendarDaysCommand => new(InitCalendarDays);
-    public Command SelectDateCommand => new(SelectDate);
+    public Command NextMonthCommand { get; }
+    public Command PrevMonthCommand { get; }
+    public Command NextYearCommand { get; }
+    public Command PrevYearCommand { get; }
+    public Command SwitchModeCommand { get; }
+    public Command SelectMonthCommand { get; }
+    public Command SelectYearCommand { get; }
+    public Command GotoTodayCommand { get; }
+    public Command InitCalendarDaysCommand { get; }
+    public Command SelectDateCommand { get; }
 
     #endregion
 
     public DatePickerViewModel(CalendarOptions options)
     {
+        NextMonthCommand = new Command(NextMonth);
+        PrevMonthCommand = new Command(PrevMonth);
+        NextYearCommand = new Command(NextYear);
+        PrevYearCommand = new Command(PrevYear);
+        SwitchModeCommand = new Command(SwitchMode);
+        SelectMonthCommand = new Command(SelectMonth);
+        SelectYearCommand = new Command(SelectYear);
+        GotoTodayCommand = new Command(GotoToday);
+        InitCalendarDaysCommand = new Command(InitCalendarDays);
+        SelectDateCommand = new Command(SelectDate);
+
+        ApplyOptions(options, rebuildWeekHeaders: true);
+    }
+
+    /// <summary>
+    /// Rebinds options onto a warm view-model without reallocating commands or year lists
+    /// when the calendar type is unchanged.
+    /// </summary>
+    public void Refresh(CalendarOptions options) =>
+        ApplyOptions(options, rebuildWeekHeaders: true);
+
+    private void ApplyOptions(CalendarOptions options, bool rebuildWeekHeaders)
+    {
         Options = options;
         _calendarService = CalendarServiceFactory.GetService(options.CalendarType);
-        
+
         SelectedDays = new ObservableCollection<DayOfMonth>(GetSelectedDates(options.SelectedPersianDates));
-        PersianMonths = new ObservableCollection<PuiTuple>();
         SelectDateMode = options.SelectDateMode;
 
-        DaysOfWeek ??= FillDaysOfWeek();
+        if (rebuildWeekHeaders || DaysOfWeek is null)
+            DaysOfWeek = FillDaysOfWeek();
+
         InitCalendarDays(_calendarService.ToGregorianDate(options.SelectedPersianDate));
     }
+
+    private void OnSelectedDaysChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) =>
+        OnPropertyChanged(nameof(CanAccept));
 
     private IEnumerable<DayOfMonth> GetSelectedDates(List<string> selectedDates) =>
         [.. (selectedDates ?? []).Select(x =>
@@ -81,8 +137,9 @@ public class DatePickerViewModel : ObservableObject
 
     private List<string> FillDaysOfWeek()
     {
+        var firstDayOfWeek = (int)_calendarService.GetFirstDayOfWeek();
         return Enumerable.Range(0, 7)
-            .Select(i => _calendarService.GetDayOfWeekName((DayOfWeek)i))
+            .Select(i => _calendarService.GetDayOfWeekName((DayOfWeek)((firstDayOfWeek + i) % 7)))
             .ToList();
     }
 
@@ -97,22 +154,31 @@ public class DatePickerViewModel : ObservableObject
 
         var monthBeginningStr = _calendarService.GetMonthBeginning(date);
         var monthEndingStr = _calendarService.GetMonthEnding(date);
-        
+
         var firstDayOfMonth = _calendarService.ToGregorianDate(monthBeginningStr);
         var endDayOfMonth = _calendarService.ToGregorianDate(monthEndingStr);
-        
-        var startDayOffset = ((int)_calendarService.GetDayOfWeek(firstDayOfMonth) + 1) % 7;
 
-        var monthDaysCount = Enumerable.Range(-startDayOffset, (int)(endDayOfMonth - firstDayOfMonth).TotalDays + startDayOffset + 1).ToList();
+        var firstDayOfWeek = (int)_calendarService.GetFirstDayOfWeek();
+        var startDayOffset = ((int)_calendarService.GetDayOfWeek(firstDayOfMonth) - firstDayOfWeek + 7) % 7;
+        var daysInMonth = (int)(endDayOfMonth - firstDayOfMonth).TotalDays + 1;
+
+        var monthDaysCount = Enumerable.Range(-startDayOffset, daysInMonth + startDayOffset).ToList();
         DaysOfMonth = GetDaysOfMonth(monthDaysCount, firstDayOfMonth, date);
     }
 
-    private List<DayOfMonth> GetDaysOfMonth(List<int> monthDaysCount, DateTime firstDayOfMonth, DateTime date) =>
-        [.. monthDaysCount.Select(offset =>
+    private List<DayOfMonth> GetDaysOfMonth(List<int> monthDaysCount, DateTime firstDayOfMonth, DateTime date)
+    {
+        var currentMonth = _calendarService.GetMonth(date);
+        var currentYear = _calendarService.GetYear(date);
+
+        return [.. monthDaysCount.Select(offset =>
         {
             var currentDate = firstDayOfMonth.AddDays(offset);
-            return CreateDayOfMonth(currentDate, GetIsSelected(currentDate, date), GetIsInRange(currentDate), offset >= 0);
+            var isInCurrentMonth = _calendarService.GetMonth(currentDate) == currentMonth
+                && _calendarService.GetYear(currentDate) == currentYear;
+            return CreateDayOfMonth(currentDate, GetIsSelected(currentDate, date), GetIsInRange(currentDate), isInCurrentMonth);
         })];
+    }
 
     private DayOfMonth CreateDayOfMonth(DateTime currentDate, bool isSelected, bool isInRange, bool isInCurrentMonth)
     {
@@ -140,18 +206,28 @@ public class DatePickerViewModel : ObservableObject
 
     private ObservableCollection<PuiTuple> GetYears()
     {
+        if (_cachedYears is not null && _yearsCacheType == Options.CalendarType)
+            return _cachedYears;
+
         var currentYear = _calendarService.GetYear(DateTime.Now);
-        return Enumerable.Range(currentYear - 100, 150)
+        _cachedYears = Enumerable.Range(currentYear - 100, 150)
             .Select(year => new PuiTuple(year.ToString(), year.ToString()))
             .ToObservableCollection();
+        _yearsCacheType = Options.CalendarType;
+        return _cachedYears;
     }
 
     private ObservableCollection<PuiTuple> GetMonths()
     {
+        if (_cachedMonths is not null && _monthsCacheType == Options.CalendarType)
+            return _cachedMonths;
+
         var monthNames = _calendarService.GetAllMonthNames();
-        return Enumerable.Range(1, _calendarService.GetMonthsInYear())
+        _cachedMonths = Enumerable.Range(1, _calendarService.GetMonthsInYear())
             .Select((i, index) => new PuiTuple(i.ToString(), monthNames.ElementAtOrDefault(index) ?? i.ToString()))
             .ToObservableCollection();
+        _monthsCacheType = Options.CalendarType;
+        return _cachedMonths;
     }
 
     private void SelectDate(object obj)
@@ -162,6 +238,8 @@ public class DatePickerViewModel : ObservableObject
         {
             case Enums.SelectionMode.Single:
                 DaysOfMonth.ForEach(day => day.IsSelected = day.PersianDate == dayOfMonth.PersianDate);
+                SelectedDays.Clear();
+                SelectedDays.Add(dayOfMonth);
                 break;
             case Enums.SelectionMode.Multiple:
                 ToggleMultipleDates(dayOfMonth);

@@ -92,7 +92,9 @@ public class GregorianCalendarService : ICalendarService
         }
     }
 
-    public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Sunday;
+    public DayOfWeek GetFirstDayOfWeek() => DayOfWeek.Sunday;
+
+    public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Saturday;
 
     public bool IsLeapYear(int year)
     {

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:models="clr-namespace:PersianUISamples.Models"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.PickersPage"
+             x:DataType="vm:PickersGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="PickerView" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding SingleTitle}" Hint="{Binding SingleHint}">
+                <pui:PickerView PlaceHolder="{Binding SinglePlaceholder}"
+                                Title="{Binding SingleDialogTitle}"
+                                Icon="&#xf007;"
+                                ItemsSource="{Binding Items}"
+                                DisplayProperty="Title"
+                                ValueMember="Id"
+                                SelectionMode="Single"
+                                RowIconProperty="Icon"
+                                AdditionButtons="{Binding ExtraButtons}"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="{Binding MultiTitle}" Hint="{Binding MultiHint}">
+                <pui:PickerView PlaceHolder="{Binding MultiPlaceholder}"
+                                Title="{Binding MultiDialogTitle}"
+                                Icon="&#xf007;"
+                                ItemsSource="{Binding MultiItems}"
+                                DisplayProperty="Title"
+                                ValueMember="Id"
+                                SelectionMode="Multiple"
+                                AdditionButtons="{Binding ExtraButtons}"
+                                SelectedItemColor="{StaticResource PdtAccent}"
+                                ActivePlaceHolderColor="{StaticResource PdtAccent}">
+                    <pui:PickerView.ItemTemplate>
+                        <DataTemplate x:DataType="models:PickerItem">
+                            <HorizontalStackLayout Padding="15,10" FlowDirection="RightToLeft" Spacing="8">
+                                <Label Text="{Binding Icon}" FontFamily="FontAwesome" WidthRequest="28"
+                                       VerticalOptions="Center" FontSize="Medium"
+                                       TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                                <Label Text="{Binding Title}" FontFamily="IranianSans" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </pui:PickerView.ItemTemplate>
+                </pui:PickerView>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

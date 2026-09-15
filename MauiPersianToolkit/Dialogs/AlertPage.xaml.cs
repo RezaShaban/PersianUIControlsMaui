@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using MauiPersianToolkit.Controls;
 using MauiPersianToolkit.Models;
 
 namespace MauiPersianToolkit.Dialogs;
@@ -24,25 +24,6 @@ public partial class AlertPage : Popup
         //this.container.MaximumHeightRequest = (height * 0.8) - 50;
     }
 
-    private async void btnAccept_Clicked(object sender, EventArgs e)
-    {
+    private async void btnAccept_Clicked(object sender, EventArgs e) =>
         await this.CloseAsync();
-    }
-
-    private void MeasureText(string message)
-    {
-        //locEditor.MaximumWidthRequest = container.MaximumWidthRequest;
-        //locEditor.Text = message;
-        //locEditor.FontFamily = "IranianSans";
-        //var locSize = locEditor.Handler.GetDesiredSize(double.PositiveInfinity, double.PositiveInfinity);
-
-        //scrollView.HeightRequest = locSize.Height;
-        //container.Children.Remove(locEditor);
-        //grdBody.HeightRequest = locSize.Height + 140;
-    }
-
-    private void Popup_HandlerChanged(object sender, EventArgs e)
-    {
-        //MeasureText(((AlertConfig)BindingContext).Message);
-    }
 }

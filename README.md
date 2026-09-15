@@ -4,49 +4,59 @@
 [![License](https://img.shields.io/github/license/RezaShaban/MauiPersianToolkit)](LICENSE)
 [![Build](https://github.com/RezaShaban/MauiPersianToolkit/actions/workflows/dotnet.yml/badge.svg)](https://github.com/RezaShaban/MauiPersianToolkit/actions)
 [![Tests](https://img.shields.io/badge/tests-20%2B%20passing-brightgreen)](https://github.com/RezaShaban/MauiPersianToolkit/actions)
-[![.NET 8](https://img.shields.io/badge/.NET-8.0-blueviolet)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-10.0-blueviolet)](https://dotnet.microsoft.com/)
 
-`MauiPersianToolkit` is a comprehensive library for **.NET MAUI** that provides a variety of Persian language UI controls and components with full support for multiple calendar systems. This library is designed to help developers create modern, cross-platform applications with support for Persian language and right-to-left (RTL) layouts.
+`MauiPersianToolkit` is a comprehensive library for **.NET MAUI** that provides Persian-language UI controls with native popups, alerts, and full light/dark theme support. It helps you build modern cross-platform apps with RTL layouts and Persian, Gregorian, and Hijri calendars — with **no CommunityToolkit dependency**.
 
 ## ✨ Key Features
 
 ### 📅 Advanced Calendar System
 - **Multiple Calendar Support**: Persian (Jalali), Gregorian, and Islamic (Hijri) calendars
+- **Correct week starts**: Saturday→Friday (Persian/Hijri), Sunday→Saturday (Gregorian)
 - **Flexible DatePicker**: Single, Multiple, and Range selection modes
 - **Calendar Service Architecture**: Strategy pattern for extensible calendar implementations
-- **Full Calendar Validation**: Automatic week alignment and day-of-week positioning
-- **20+ Unit Tests**: Comprehensive test coverage for calendar functionality
+- **Unit Tests**: Calendar conversion, week layout, and Hijri display coverage
 
 ### 🎨 UI Controls
 - **Persian DatePicker**: Customizable date picker with multiple selection modes
-- **TreeView**: Supports None, Single, and Multiple selection modes with hierarchy support
-- **TabView**: Customizable tab control with multiple tabs and dynamic content
-- **SlideButton**: Interactive slideable button for confirmation actions
-- **Picker**: Single and Multiple selection pickers with enhanced UI
-- **Entry & Editor**: Enhanced text entry controls with Persian language and RTL support
-- **Expander**: Expandable and collapsible container for dynamic content
-- **CheckBox, Button, Circle Image**: Custom-styled UI components
+- **TreeView**: None, Single, and Multiple selection with hierarchy support (virtualized `CollectionView` rows)
+- **TabView**: Bottom tabs with sliding indicator, content cross-fade, icon pulse, and lazy pages
+- **SlideButton**: Interactive slideable confirmation button
+- **Picker**: Single and Multiple selection with enhanced UI
+- **Entry & Editor**: Persian/RTL-friendly text inputs
+- **Expander**: Native expandable/collapsible container
+- **CheckBox, Button, Circle Image**: Custom-styled components
 
-### 💬 Dialog System
-- **Alert Dialog**: Simple message dialog
-- **Confirm Dialog**: Dialog with confirmation options
-- **Prompt Dialog**: Dialog to capture user input
-- **Custom Dialog**: Fully customizable dialog with any content
+### 💬 Dialogs & Alerts (native)
+- **Alert / Confirm / Prompt / Custom** dialogs on a native popup surface
+- **Toast** and **Snackbar** (Android, iOS, Windows)
+- **Popup** API for custom overlays — no third-party popup package required
+
+### 🌓 Light / Dark theme
+- Follows the system (or app) `AppTheme` automatically
+- Overridable semantic color tokens (`PdtSurfaceLight`, `PdtAccent`, …)
+- Configure via `UseMauiPersianToolkit` options, `App.xaml` resources, or `PersianTheme.Configure` at runtime
+
+### 🌐 Localization
+- UI chrome (dialogs, picker, date picker buttons) via `PersianToolkitStrings`
+- Built-in **fa** and **en**; add catalogs or plug in `IPersianToolkitLocalizer`
+- XAML: `{mpt:Localize Today}`
 
 ### 🛠️ Developer Tools
 - **Converters**: PersianDateConverter, PersianDateTimeConverter, and more
 - **Extensions**: Calendar extensions for easy date manipulation
-- **Custom Fonts**: Built-in support for IranianSans and FontAwesome fonts
+- **Custom Fonts**: Embedded IranianSans and FontAwesome
 - **RTL Support**: Full right-to-left layout support for all controls
 
 ## 📋 Project Statistics
 
-- **Version**: 2.0.7
-- **Target Framework**: .NET 8.0+
+- **Version**: 3.0.0
+- **Target Framework**: .NET 10.0 (`net10.0`, Android, iOS, Windows)
 - **Platforms**: Windows, iOS, Android
 - **License**: MIT
-- **Tests**: 20+ unit tests (Calendar Service + Week Layout)
-- **Code Quality**: CI/CD with automated testing on every PR
+- **Dependencies**: none beyond `Microsoft.Maui.Controls`
+- **Tests**: calendar + week-layout + Hijri display tests
+- **CI/CD**: automated build and tests on every PR
 
 ## 🚀 Installation
 
@@ -66,7 +76,7 @@ dotnet add package MauiPersianToolkit
 
 ### 1. Startup Configuration
 
-Add the Persian Toolkit to your MauiApp in `MauiProgram.cs`:
+Register the toolkit in `MauiProgram.cs`:
 
 ```csharp
 public static class MauiProgram
@@ -80,23 +90,73 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                fonts.AddFont("IranianSans.ttf", "IranianSans");
             })
-            .UseMauiCommunityToolkit()
-            .UsePersianUIControls();  // Add this line
-        
+            .UseMauiPersianToolkit();  // registers fonts, handlers, theme resources
+
         return builder.Build();
     }
 }
 ```
 
-### 2. Basic XAML Usage
+The toolkit ships **native** popups, toasts, snackbars and expander — no CommunityToolkit (or other UI package) is required.
+
+Application-wide defaults (including theme colors) can be set at the same time:
+
+```csharp
+builder.UseMauiPersianToolkit(options =>
+{
+    options.DefaultCalendarType = CalendarType.Persian;
+    options.DefaultFontFamily = "IranianSans";
+    options.DefaultAcceptText = "ثبت";
+
+    // Optional light/dark palette overrides
+    options.Theme.SurfaceDark = Color.FromArgb("#0D1117");
+    options.Theme.Accent = Colors.Teal;
+    options.Theme.Accept = Color.FromArgb("#2EA043");
+});
+```
+
+### 2. Merge styles in `App.xaml`
+
+Merge `PersianStyles` so default theme tokens and control styles are available:
+
+```xml
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:persian="clr-namespace:MauiPersianToolkit.Resources;assembly=MauiPersianToolkit"
+             x:Class="YourApp.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <persian:PersianStyles/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Optional: override any Pdt* token after merging PersianStyles -->
+            <!-- <Color x:Key="PdtSurfaceDark">#0D1117</Color> -->
+            <!-- <Color x:Key="PdtAccent">#2DD4BF</Color> -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+```
+
+If you forget to merge `PersianStyles`, `UseMauiPersianToolkit` injects the defaults automatically when the app (or the first toolkit control) starts. Merging them in `App.xaml` is still fine if you want to override tokens in XAML:
+
+```csharp
+public App()
+{
+    InitializeComponent();
+    PersianTheme.EnsureApplicationStyles(); // optional; also happens automatically
+    MainPage = new AppShell();
+}
+```
+
+### 3. Basic XAML Usage
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:persian="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:persian="http://schemas.mauipersiantoolkit.com/2026/toolkit"
              x:Class="YourApp.MainPage"
              Title="Persian Toolkit Demo">
 
@@ -144,7 +204,7 @@ public static class MauiProgram
 </ContentPage>
 ```
 
-### 3. Calendar System Usage
+### 4. Calendar System Usage
 
 #### Using Calendar Services Directly
 
@@ -171,6 +231,7 @@ int year = persianService.GetYear(today);
 int month = persianService.GetMonth(today);
 string monthName = persianService.GetMonthName(month);
 bool isLeap = persianService.IsLeapYear(year);
+DayOfWeek first = persianService.GetFirstDayOfWeek();  // Saturday
 DayOfWeek holiday = persianService.GetLastDayOfWeek();  // Friday for Persian
 ```
 
@@ -193,7 +254,7 @@ var parsed = "1403/05/25".ToDateTime();
 var gregorianParsed = "2024/08/16".ToDateTime(CalendarType.Gregorian);
 ```
 
-### 4. Dialog Usage
+### 5. Dialog Usage
 
 ```csharp
 using MauiPersianToolkit.Services.Dialog;
@@ -287,10 +348,160 @@ public partial class MainPage : ContentPage
 }
 ```
 
+### 6. Toast & Snackbar
+
+```csharp
+using MauiPersianToolkit.Alerts;
+using MauiPersianToolkit.Core;
+
+// Toast — short non-interactive message
+await Toast.Make("Saved successfully", ToastDuration.Short).Show();
+
+// Snackbar — message with an optional action
+await Snackbar.Make(
+    "Item deleted",
+    action: () => { /* undo */ },
+    actionButtonText: "Undo",
+    duration: TimeSpan.FromSeconds(3)).Show();
+```
+
+Snackbar colors follow the current theme (`PdtAlertBg*` / `PdtAlertFg*`) and can be overridden through `SnackbarOptions` or theme tokens.
+
+## 🌓 Light / Dark theme customization
+
+Controls, dialogs and alerts use semantic `Pdt*` color keys and `AppThemeBinding`, so they follow the system (or app) light/dark theme. Consumers can replace any token.
+
+### Option A — `UseMauiPersianToolkit` (C#)
+
+```csharp
+builder.UseMauiPersianToolkit(options =>
+{
+    options.Theme.PageDark = Color.FromArgb("#0B0F14");
+    options.Theme.SurfaceDark = Color.FromArgb("#161B22");
+    options.Theme.InputFillDark = Color.FromArgb("#1F2937");
+    options.Theme.OutlineDark = Color.FromArgb("#374151");
+    options.Theme.OnSurfaceDark = Color.FromArgb("#F3F4F6");
+    options.Theme.Accent = Color.FromArgb("#2DD4BF");
+    options.Theme.Accept = Color.FromArgb("#22C55E");
+    options.Theme.Cancel = Color.FromArgb("#EF4444");
+});
+```
+
+### Option B — `App.xaml` resources
+
+Define the same keys **after** merging `PersianStyles` so your values win:
+
+```xml
+<ResourceDictionary.MergedDictionaries>
+    <persian:PersianStyles/>
+</ResourceDictionary.MergedDictionaries>
+
+<Color x:Key="PdtSurfaceDark">#0D1117</Color>
+<Color x:Key="PdtOnSurfaceDark">#E6EDF3</Color>
+<Color x:Key="PdtAccent">#58A6FF</Color>
+<Color x:Key="PdtAlertBgDark">#F0F6FC</Color>
+<Color x:Key="PdtAlertFgDark">#0D1117</Color>
+```
+
+### Option C — runtime
+
+```csharp
+PersianTheme.Configure(theme =>
+{
+    theme.SurfaceDark = Color.FromArgb("#111827");
+    theme.Accent = Colors.Orange;
+});
+```
+
+### Theme token reference
+
+| Key | Role |
+|-----|------|
+| `PdtPageLight` / `PdtPageDark` | Page background |
+| `PdtSurfaceLight` / `PdtSurfaceDark` | Cards, dialogs, containers |
+| `PdtInputFillLight` / `PdtInputFillDark` | Entry / picker / date field fill |
+| `PdtOutlineLight` / `PdtOutlineDark` | Borders |
+| `PdtOnSurfaceLight` / `PdtOnSurfaceDark` | Primary text / icons |
+| `PdtMutedLight` / `PdtMutedDark` | Secondary text |
+| `PdtFooterLight` / `PdtFooterDark` | Dialog footers |
+| `PdtDisabledLight` / `PdtDisabledDark` | Disabled text |
+| `PdtDayButtonLight` / `PdtDayButtonDark` | Calendar day cells |
+| `PdtAccept` / `PdtCancel` / `PdtAccent` | Actions & accent (shared) |
+| `PdtAlertBgLight` / `PdtAlertBgDark` | Toast / snackbar background |
+| `PdtAlertFgLight` / `PdtAlertFgDark` | Toast / snackbar text |
+
+Constants live in `PersianThemeKeys`. Defaults are defined in `PersianStyles`.
+
+## 🌐 Localization (multi-language UI chrome)
+
+Toolkit button labels and placeholders (Accept, Cancel, Today, Select date, …) are **not hardcoded** anymore.
+Built-in catalogs: **Persian (`fa`)** and **English (`en`)**. Calendar month/day names stay with each calendar service (next localization step).
+
+### Switch language at startup
+
+```csharp
+builder.UseMauiPersianToolkit(options =>
+{
+    options.Localization.Culture = "en"; // or "fa", "fa-IR", "en-US"
+});
+```
+
+### Override individual strings
+
+```csharp
+builder.UseMauiPersianToolkit(options =>
+{
+    options.Localization.Culture = "fa";
+    options.Localization.StringOverrides[PersianToolkitStringId.Accept] = "تایید";
+    options.Localization.StringOverrides[PersianToolkitStringId.Ok] = "متوجه شدم";
+});
+```
+
+### Add another language
+
+```csharp
+builder.UseMauiPersianToolkit(options =>
+{
+    options.Localization.AdditionalCatalogs["ar"] = new Dictionary<string, string>
+    {
+        [PersianToolkitStringId.Accept] = "حفظ",
+        [PersianToolkitStringId.Cancel] = "إلغاء",
+        [PersianToolkitStringId.Confirm] = "موافق",
+        [PersianToolkitStringId.Ok] = "حسناً",
+        [PersianToolkitStringId.SelectDate] = "اختر التاريخ",
+        [PersianToolkitStringId.Today] = "اليوم",
+        [PersianToolkitStringId.SystemErrorTitle] = "خطأ في النظام",
+    };
+    options.Localization.Culture = "ar";
+});
+```
+
+### Change culture at runtime
+
+```csharp
+PersianToolkitStrings.SetCulture("en");
+```
+
+> Note: XAML `{mpt:Localize Today}` is resolved when the view is created. Recreate the page (or navigate away/back) after a runtime culture change so labels refresh.
+
+### Keys
+
+| Key | Persian | English |
+|-----|---------|---------|
+| `Accept` | ثبت | Save |
+| `Cancel` | انصراف | Cancel |
+| `Confirm` | تایید | OK |
+| `Ok` | باشه | OK |
+| `SelectDate` | انتخاب تاریخ | Select date |
+| `Today` | امروز | Today |
+| `SystemErrorTitle` | خطای سیستمی | System error |
+
+Use `PersianToolkitStringId.*` in code and `{mpt:Localize Today}` (or `Key=SelectDate`) in XAML.
+
 ## 📚 Examples and Documentation
 
 ### Calendar Service Examples
-See `MauiPersianToolkit/Examples/CalendarServiceExamples.cs` for:
+See `PersianUISamples/Examples/CalendarServiceExamples.cs` for:
 - Extension methods usage
 - Calendar service factory usage
 - Calendar conversions
@@ -327,8 +538,6 @@ dotnet test ./MauiPersianToolkit.Test/MauiPersianToolkit.Test.csproj
 
 ## 🔧 Customization
 
-All controls are designed to be easily customizable:
-
 ### Custom Calendar Type
 
 Implement `ICalendarService` for custom calendar support:
@@ -336,7 +545,8 @@ Implement `ICalendarService` for custom calendar support:
 ```csharp
 public class MyCustomCalendarService : ICalendarService
 {
-    // Implement interface methods
+    public DayOfWeek GetFirstDayOfWeek() => DayOfWeek.Saturday;
+    public DayOfWeek GetLastDayOfWeek() => DayOfWeek.Friday;
     public string ToCalendarDate(DateTime gregorianDate) { /* ... */ }
     public DateTime ToGregorianDate(string calendarDate) { /* ... */ }
     // ... other methods
@@ -344,14 +554,12 @@ public class MyCustomCalendarService : ICalendarService
 
 // Register with factory
 CalendarServiceFactory.RegisterService(
-    CalendarType.Custom, 
+    CalendarType.Custom,
     new MyCustomCalendarService()
 );
 ```
 
-### Style Customization
-
-Customize colors, fonts, and behaviors:
+### Control style customization
 
 ```xml
 <persian:DatePicker
@@ -360,6 +568,8 @@ Customize colors, fonts, and behaviors:
     CanSelectHolidays="False"
     DisplayFormat="yyyy/MM/dd" />
 ```
+
+For app-wide light/dark colors, prefer the [theme tokens](#-light--dark-theme-customization) above rather than hard-coding colors on each control.
 
 ## 🧪 Testing
 
@@ -407,7 +617,6 @@ We welcome contributions! Follow these steps:
 ## 🙏 Acknowledgments
 
 - .NET MAUI Community for excellent framework and tools
-- CommunityToolkit.Maui for reusable components
 - All contributors and users for feedback and suggestions
 
 ## 📞 Support
@@ -425,14 +634,16 @@ We welcome contributions! Follow these steps:
 
 ## 📊 Project Status
 
-| Component | Status | Coverage |
-|-----------|--------|----------|
-| Core Library | ✅ Stable | Mature |
-| Calendar System | ✅ Stable | 3 calendars |
-| UI Controls | ✅ Stable | 10+ controls |
-| Dialog System | ✅ Stable | 4 types |
-| Unit Tests | ✅ Complete | 20+ tests |
-| Documentation | ✅ Complete | Full |
+| Component | Status | Notes |
+|-----------|--------|--------|
+| Core Library | ✅ Stable | .NET 10, no CommunityToolkit |
+| Calendar System | ✅ Stable | Persian / Gregorian / Hijri |
+| UI Controls | ✅ Stable | Inputs, picker, tabs, tree, … |
+| Native Popup / Toast / Snackbar | ✅ Stable | Android, iOS, Windows |
+| Light / Dark theme | ✅ Stable | Overridable `Pdt*` tokens |
+| Dialog System | ✅ Stable | Alert, Confirm, Prompt, Custom |
+| Unit Tests | ✅ Active | Calendar + layout + Hijri |
+| Documentation | ✅ Updated | README + samples |
 
 ---
 

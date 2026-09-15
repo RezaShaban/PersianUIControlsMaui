@@ -2,7 +2,11 @@
 using MauiPersianToolkit.Models;
 using MauiPersianToolkit.Services.Dialog;
 using MauiPersianToolkit.ViewModels;
+using PersianUISamples.Localization;
+using PersianUISamples.Models;
 using System.Collections.ObjectModel;
+using PickerItem = PersianUISamples.Models.PickerItem;
+using TreeViewModel = PersianUISamples.Models.TreeNodeModel;
 
 namespace PersianUISamples.ViewModels
 {
@@ -26,9 +30,15 @@ namespace PersianUISamples.ViewModels
         private Command showPromptCommand;
         private Command showCustomCommand;
         private Command registerInCommand;
+        private Command showToastCommand;
+        private Command showSnackbarCommand;
         private readonly IDialogService dialogService;
+        private TimeSpan meetingTime = new(14, 30, 0);
+        private PickerItem selectedCity;
+        private string selectedCityText;
 
         public string PersianDate { get => persianDate; set => SetProperty(ref persianDate, value); }
+        public TimeSpan MeetingTime { get => meetingTime; set => SetProperty(ref meetingTime, value); }
         public string PersianDateRange { get => persianDateRange; set => SetProperty(ref persianDateRange, value); }
         public string PersianDateMultiple { get => persianDateMultiple; set => SetProperty(ref persianDateMultiple, value); }
         public List<string> BadgeDates { get => badgeDates; set => SetProperty(ref badgeDates, value); }
@@ -41,12 +51,18 @@ namespace PersianUISamples.ViewModels
         public ObservableCollection<TreeViewModel> SelectedItemsTree { get => selectedItemsTree; set => SetProperty(ref selectedItemsTree, value); }
         public ObservableCollection<PickerItem> PickerMultipleItems { get => pickerMultipleItems; set => SetProperty(ref pickerMultipleItems, value); }
         public ObservableCollection<PickerButton> PickerAdditionButtons { get; set; }
+        public ObservableCollection<PickerItem> Cities { get; private set; }
+        public AutoCompleteOptions CityAutoCompleteOptions { get; private set; }
+        public PickerItem SelectedCity { get => selectedCity; set => SetProperty(ref selectedCity, value); }
+        public string SelectedCityText { get => selectedCityText; set => SetProperty(ref selectedCityText, value); }
         public Command OnChangeDateCommand { get { onChangeDateCommand ??= new Command(OnDateChanged); return onChangeDateCommand; } }
         public Command ShowAlertCommand { get { showAlertCommand ??= new Command(ShowAlert); return showAlertCommand; } }
         public Command ShowConfirmCommand { get { showConfirmCommand ??= new Command(ShowConfirm); return showConfirmCommand; } }
         public Command ShowPromptCommand { get { showPromptCommand ??= new Command(ShowPrompt); return showPromptCommand; } }
         public Command ShowCustomCommand { get { showCustomCommand ??= new Command(ShowCustom); return showCustomCommand; } }
         public Command RegisterInCommand { get { registerInCommand ??= new Command(RegisterIn); return registerInCommand; } }
+        public Command ShowToastCommand { get { showToastCommand ??= new Command(ShowToast); return showToastCommand; } }
+        public Command ShowSnackbarCommand { get { showSnackbarCommand ??= new Command(ShowSnackbar); return showSnackbarCommand; } }
         public MainViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
@@ -55,11 +71,11 @@ namespace PersianUISamples.ViewModels
 
         private void InitData()
         {
-            SelectedItemsTree = new ObservableCollection<TreeViewModel>()
-            {
-                new TreeViewModel(){ Id = 1, Title = "سطح 1-1", ParentId = null },
-                new TreeViewModel(){ Id = 8, Title = "سطح 4-1", ParentId = 6 }
-            };
+            SelectedItemsTree =
+            [
+                new() { Id = 1, Title = DemoStrings.TreeL11, ParentId = null },
+                new() { Id = 8, Title = DemoStrings.TreeL41, ParentId = 6 }
+            ];
             CalendarOption = new CalendarOptions()
             {
                 CalendarType = MauiPersianToolkit.Enums.CalendarType.Hijri,
@@ -108,35 +124,25 @@ namespace PersianUISamples.ViewModels
                 ],
                 CanSelectHolidays = true
             };
-            PickerMultipleItems = new ObservableCollection<PickerItem>
+            PickerMultipleItems = SampleData.CreatePickerItems();
+            PickerItems = SampleData.CreatePickerItems();
+            Cities = SampleData.CreateCities();
+            CityAutoCompleteOptions = new AutoCompleteOptions
             {
-                new PickerItem() { Id = 1, Title = "انتخاب اول", Icon = "\uf027"},
-                new PickerItem() { Id = 2, Title = "انتخاب دوم", Icon = "\uf037"},
-                new PickerItem() { Id = 3, Title = "انتخاب سوم", Icon = "\uf047"},
-                new PickerItem() { Id = 4, Title = "انتخاب چهارم", Icon = "\uf057"}
+                FilterMode = MauiPersianToolkit.Enums.AutoCompleteFilterMode.Contains,
+                MinimumPrefixLength = 1,
+                MaxSuggestions = 8,
+                UseNativeSuggestions = true,
+                ShowClearButton = true,
+                OpenOnFocus = true,
+                FilterDebounceMs = 100
             };
-            PickerItems = new ObservableCollection<PickerItem>
-            {
-                new PickerItem() { Id = 1, Title = "گزینه اول", Icon = "\uf027" },
-                new PickerItem() { Id = 2, Title = "گزینه دوم", Icon = "\uf037" },
-                new PickerItem() { Id = 3, Title = "گزینه سوم", Icon = "\uf047" }
-            };
-            PickerAdditionButtons = new ObservableCollection<PickerButton>() {
-                new PickerButton() { Text = "\uf067" },
-                new PickerButton() { Text = "\uf057" }
-            };
-            TreeItems = new ObservableCollection<TreeViewModel>()
-            {
-                new TreeViewModel(){ Id = 1, Title = "سطح 1-1", ParentId = null },
-                new TreeViewModel(){ Id = 2, Title = "سطح 2-1", ParentId = 1 },
-                new TreeViewModel(){ Id = 3, Title = "سطح 2-2", ParentId = 1 },
-                new TreeViewModel(){ Id = 4, Title = "سطح 1-2", ParentId = null },
-                new TreeViewModel(){ Id = 5, Title = "سطح 2-1", ParentId = 4 },
-                new TreeViewModel(){ Id = 6, Title = "سطح 3-1", ParentId = 5 },
-                new TreeViewModel(){ Id = 7, Title = "سطح 3-1", ParentId = 5 },
-                new TreeViewModel(){ Id = 8, Title = "سطح 4-1", ParentId = 6 },
-                new TreeViewModel(){ Id = 9, Title = "سطح 4-1", ParentId = 7 },
-            };
+            PickerAdditionButtons =
+            [
+                new() { Text = "\uf067" },
+                new() { Text = "\uf057" }
+            ];
+            TreeItems = SampleData.CreateTreeItems();
         }
 
         private void OnAcceptDate(object obj)
@@ -167,19 +173,35 @@ namespace PersianUISamples.ViewModels
 
         private void ShowAlert(object obj)
         {
-            dialogService.Alert("لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد." +
-                "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد." +
-                "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.", "هشدار");
+            dialogService.Alert(DemoStrings.AlertMessage, DemoStrings.AlertTitle);
+        }
+
+        private void ShowToast(object obj)
+        {
+            dialogService.Toast(new ToastConfig()
+            {
+                Message = DemoStrings.ToastMessage,
+            });
+        }
+
+        private void ShowSnackbar(object obj)
+        {
+            dialogService.Snackbar(new SnackbarConfig()
+            {
+                Message = DemoStrings.SnackbarMessage,
+                Duration = TimeSpan.FromSeconds(10),
+                OnAction = new Action(() => { }),
+            });
         }
 
         private void ShowConfirm(object obj)
         {
             dialogService.Confirm(new ConfirmConfig()
             {
-                Title = "حذف کالا",
-                AcceptText = "آره",
-                CancelText = "نه",
-                Message = "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.",
+                Title = DemoStrings.ConfirmTitle,
+                AcceptText = DemoStrings.ConfirmYes,
+                CancelText = DemoStrings.ConfirmNo,
+                Message = DemoStrings.ConfirmMessage,
                 Icon = MessageIcon.QUESTION,
                 OnAction = new Action<bool>((arg) => { }),
             });
@@ -189,11 +211,9 @@ namespace PersianUISamples.ViewModels
         {
             dialogService.Prompt(new PromptConfig()
             {
-                Title = "ثبت اطلاعات",
-                AcceptText = "ثبت",
-                CancelText = "انصراف",
-                Message = "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.",
-                Placeholder = "اطلاعات",
+                Title = DemoStrings.PromptTitle,
+                Message = DemoStrings.PromptMessage,
+                Placeholder = DemoStrings.PromptPlaceholder,
                 Icon = MessageIcon.QUESTION,
                 OnAction = new Action<PromptResult>((arg) => { }),
             });
@@ -203,10 +223,8 @@ namespace PersianUISamples.ViewModels
         {
             dialogService.CustomDialog(new CustomDialogConfig()
             {
-                Title = "ثبت اطلاعات",
-                AcceptText = "ثبت",
-                CancelText = "انصراف",
-                Message = "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.",
+                Title = DemoStrings.CustomDialogTitle,
+                Message = DemoStrings.CustomDialogMessage,
                 Icon = MessageIcon.QUESTION,
                 AcceptIcon = MessageIcon.QUESTION,
                 Cancelable = true,
@@ -219,26 +237,11 @@ namespace PersianUISamples.ViewModels
                 {
                     Children =
                     {
-                        new EntryView(){ PlaceHolder = "نام" },
-                        new MauiPersianToolkit.Controls.DatePicker(){ PlaceHolder = "تاریخ تولد" }
+                        new EntryView(){ PlaceHolder = DemoStrings.CustomNamePlaceholder },
+                        new MauiPersianToolkit.Controls.DatePicker(){ PlaceHolder = DemoStrings.CustomDatePlaceholder }
                     }
                 }
             });
         }
-    }
-
-    public class PickerItem
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Icon { get; set; } = "\uf064";
-        public int? ParentId { get; set; }
-    }
-
-    public class TreeViewModel
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public int? ParentId { get; set; }
     }
 }

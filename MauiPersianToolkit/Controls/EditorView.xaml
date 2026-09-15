@@ -1,14 +1,24 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<controls:PersianInputBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
              x:Class="MauiPersianToolkit.Controls.EditorView"
              xmlns:uc="clr-namespace:MauiPersianToolkit.Controls"
              xmlns:controls="clr-namespace:MauiPersianToolkit.Controls" x:DataType="controls:EditorView"
              x:Name="editorView">
     <Grid ColumnDefinitions="100*" RowDefinitions="Auto,Auto" RowSpacing="0">
-        <Rectangle Aspect="Fill" RadiusX="5" RadiusY="5" StrokeThickness="1" Fill="#fdfdfd" x:Name="rectangle" StrokeLineJoin="Round" Grid.RowSpan="1" Grid.Row="1" Stroke="#a4a6a9" Margin="0,15,0,0" VerticalOptions="Fill" HorizontalOptions="Fill"/>
+        <Rectangle Aspect="Fill" RadiusX="5" RadiusY="5" StrokeThickness="1"
+                   Fill="{AppThemeBinding Light={StaticResource PdtInputFillLight}, Dark={StaticResource PdtInputFillDark}}"
+                   x:Name="outline" StrokeLineJoin="Round" Grid.RowSpan="1" Grid.Row="1"
+                   Stroke="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}"
+                   Margin="0,15,0,0" VerticalOptions="Fill" HorizontalOptions="Fill"/>
         <uc:LabelView Text="{Binding Title,Source={x:Reference editorView}}" Grid.Column="0" Grid.Row="0" Icon="{Binding Icon,Source={x:Reference editorView}}" Margin="0,15,0,-15" TextColor="{Binding PlaceHolderColor,Source={x:Reference editorView}}" BackgroundColor="Transparent" HorizontalOptions="Start"/>
-        <Editor FontAutoScalingEnabled="True" Placeholder="{Binding PlaceHolder,Source={x:Reference editorView}}" Grid.Column="0" PlaceholderColor="{Binding PlaceHolderColor,Source={x:Reference editorView}}" Grid.Row="1" Text="{Binding Text,Source={x:Reference editorView}}" AutoSize="TextChanges" TextColor="Black" Keyboard="{Binding Keyboard,Source={x:Reference editorView}}" FontSize="Small" Margin="7,10,7,-5" x:Name="txtEditor" FontFamily="IranianSans" VerticalOptions="Fill" MinimumHeightRequest="100"/>
+        <Editor FontAutoScalingEnabled="True" Placeholder="{Binding PlaceHolder,Source={x:Reference editorView}}"
+                Grid.Column="0" PlaceholderColor="{Binding PlaceHolderColor,Source={x:Reference editorView}}"
+                Grid.Row="1" Text="{Binding Text,Source={x:Reference editorView}}" AutoSize="TextChanges"
+                TextColor="{Binding TextColor,Source={x:Reference editorView}}"
+                Keyboard="{Binding Keyboard,Source={x:Reference editorView}}" FontSize="Small" Margin="7,10,7,-5"
+                BackgroundColor="Transparent"
+                x:Name="txtEditor" FontFamily="IranianSans" VerticalOptions="Fill" MinimumHeightRequest="100"/>
         <Label Text="{Binding ErrorMessage,Source={x:Reference editorView}}" Grid.Column="0" HorizontalOptions="End" VerticalTextAlignment="Center" x:Name="lblMessage" Grid.Row="2" InputTransparent="True" VerticalOptions="Center" Margin="0,0,0,-24" IsVisible="{Binding IsValid,Source={x:Reference editorView}}"/>
     </Grid>
-</ContentView>
+</controls:PersianInputBase>

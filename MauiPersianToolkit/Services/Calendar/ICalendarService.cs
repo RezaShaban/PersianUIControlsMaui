@@ -57,7 +57,14 @@ public interface ICalendarService
     string GetDayOfWeekName(DayOfWeek dayOfWeek);
 
     /// <summary>
-    /// Gets the holiday day of week (e.g., Friday for Persian/Islamic calendars)
+    /// Gets the first day of the week for this calendar's grid
+    /// (e.g. Saturday for Persian/Hijri, Sunday for Gregorian).
+    /// </summary>
+    DayOfWeek GetFirstDayOfWeek();
+
+    /// <summary>
+    /// Gets the last / holiday day of the week
+    /// (e.g. Friday for Persian/Hijri, Saturday for Gregorian).
     /// </summary>
     DayOfWeek GetLastDayOfWeek();
 

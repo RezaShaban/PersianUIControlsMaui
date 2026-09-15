@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.AutoCompletePage"
+             x:DataType="vm:AutoCompleteGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="AutoCompleteView" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="{Binding SectionTitle}"
+                              Subtitle="{Binding SectionSub}"
+                              Hint="{Binding SectionHint}">
+                <VerticalStackLayout Spacing="10">
+                    <pui:AutoCompleteView PlaceHolder="{Binding CityPlaceholder}"
+                                          Icon="&#xf041;"
+                                          ItemsSource="{Binding Cities}"
+                                          DisplayProperty="Title"
+                                          Text="{Binding CityText}"
+                                          SelectedItem="{Binding SelectedCity}"
+                                          Options="{Binding Options}"/>
+                    <Label FontFamily="IranianSans" FontSize="12"
+                           Text="{Binding SelectedText}"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                    <Label FontFamily="IranianSans" FontSize="12"
+                           Text="{Binding TypedText}"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                </VerticalStackLayout>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

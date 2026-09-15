@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace MauiPersianToolkit.Extensions;

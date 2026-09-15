@@ -1,10 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace MauiPersianToolkit.ViewModels;
 public abstract partial class ObservableObject : INotifyPropertyChanged
 {
-    private static readonly Dictionary<string, PropertyChangedEventArgs> _eventArgsCache = new();
+    private static readonly ConcurrentDictionary<string, PropertyChangedEventArgs> EventArgsCache = new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -27,13 +28,8 @@ public abstract partial class ObservableObject : INotifyPropertyChanged
         if (propertyName is null)
             return;
 
-        if (!_eventArgsCache.TryGetValue(propertyName, out var args))
-        {
-            args = new PropertyChangedEventArgs(propertyName);
-            _eventArgsCache[propertyName] = args;
-        }
-
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        var args = EventArgsCache.GetOrAdd(propertyName, static name => new PropertyChangedEventArgs(name));
+        PropertyChanged?.Invoke(this, args);
     }
 
     protected void OnPropertyChanged(params string[] propertyNames)

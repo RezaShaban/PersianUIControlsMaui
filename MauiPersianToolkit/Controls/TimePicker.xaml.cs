@@ -1,242 +1,271 @@
-﻿using System.Runtime.CompilerServices;
+﻿using MauiPersianToolkit.Core;
+using MauiPersianToolkit.Extensions;
+using MauiPersianToolkit.Localization;
+using MauiPersianToolkit.Models;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 
-namespace PersianUIControlsMaui.Controls;
+namespace MauiPersianToolkit.Controls;
 
+/// <summary>
+/// Persian-styled time field that opens a reusable bottom-sheet wheel picker.
+/// </summary>
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class TimePicker : ContentView
+public partial class TimePicker : PersianInputBase
 {
-    #region Field's
-    Color _color;
-    #endregion
-    #region Propertei's
-    public static readonly BindableProperty SelectDateModeProperty = BindableProperty.Create(nameof(SelectDateMode), typeof(SelectionDateMode), typeof(DatePicker), SelectionDateMode.Day, BindingMode.TwoWay);
-    public SelectionDateMode SelectDateMode
-    {
-        get { return (SelectionDateMode)GetValue(SelectDateModeProperty); }
-        set { SetValue(SelectDateModeProperty, value); }
-    }
-    public static readonly BindableProperty SelectedTimeProperty = BindableProperty.Create(nameof(SelectedTime), typeof(TimeSpan), typeof(TimePicker), DateTime.Now.TimeOfDay, BindingMode.TwoWay);
+    private ContentPage? _parentPage;
+    private TimePickerView? _sheet;
+    private Task? _initTask;
+    private bool _isShowing;
+    private bool _hasUserValue;
+
+    public static readonly BindableProperty SelectedTimeProperty = BindableProperty.Create(
+        nameof(SelectedTime), typeof(TimeSpan), typeof(TimePicker),
+        defaultValueCreator: static _ => TimeSpan.Zero,
+        defaultBindingMode: BindingMode.TwoWay,
+        propertyChanged: static (b, _, _) => ((TimePicker)b).OnSelectedTimeChanged());
+
     public TimeSpan SelectedTime
     {
-        get { return (TimeSpan)GetValue(SelectedTimeProperty); }
-        set { SetValue(SelectedTimeProperty, value); }
-    }
-    public static readonly BindableProperty FormattedTimeProperty = BindableProperty.Create(nameof(FormattedTime), typeof(string), typeof(TimePicker), default(string), BindingMode.TwoWay);
-    public string FormattedTime
-    {
-        get { return (string)GetValue(FormattedTimeProperty); }
-        set { SetValue(FormattedTimeProperty, value); }
-    }
-    public static readonly BindableProperty TimeSeparatorProperty = BindableProperty.Create(nameof(TimeSeparator), typeof(char), typeof(TimePicker), ':', BindingMode.TwoWay);
-    public char TimeSeparator
-    {
-        get { return (char)GetValue(TimeSeparatorProperty); }
-        set { SetValue(TimeSeparatorProperty, value); }
-    }
-    public static readonly BindableProperty DisplayFormatProperty = BindableProperty.Create(nameof(DisplayFormat), typeof(string), typeof(DatePicker), "hh:mm:ss", BindingMode.TwoWay);
-    public string DisplayFormat
-    {
-        get { return (string)GetValue(DisplayFormatProperty); }
-        set { SetValue(DisplayFormatProperty, value); }
+        get => (TimeSpan)GetValue(SelectedTimeProperty);
+        set => SetValue(SelectedTimeProperty, value);
     }
 
-    public static readonly BindableProperty PlaceHolderColorProperty = BindableProperty.Create(nameof(PlaceHolderColor), typeof(Color), typeof(PickerView), Colors.Gray, BindingMode.TwoWay);
-    public Color PlaceHolderColor
+    public static readonly BindableProperty FormattedTimeProperty = BindableProperty.Create(
+        nameof(FormattedTime), typeof(string), typeof(TimePicker),
+        string.Empty, BindingMode.OneWay);
+
+    public string FormattedTime
     {
-        get { return (Color)GetValue(PlaceHolderColorProperty); }
-        set { SetValue(PlaceHolderColorProperty, value); }
+        get => (string)GetValue(FormattedTimeProperty);
+        private set => SetValue(FormattedTimeProperty, value);
     }
-    public static readonly BindableProperty ActivePlaceHolderColorProperty = BindableProperty.Create(nameof(ActivePlaceHolderColor), typeof(Color), typeof(PickerView), Colors.Gray, BindingMode.TwoWay);
-    public Color ActivePlaceHolderColor
+
+    public static readonly BindableProperty DisplayFormatProperty = BindableProperty.Create(
+        nameof(DisplayFormat), typeof(string), typeof(TimePicker),
+        "HH:mm", BindingMode.OneWay,
+        propertyChanged: static (b, _, _) => ((TimePicker)b).UpdateFormattedTime());
+
+    /// <summary>Standard .NET time format (e.g. <c>HH:mm</c>, <c>hh:mm tt</c>, <c>HH:mm:ss</c>).</summary>
+    public string DisplayFormat
     {
-        get { return (Color)GetValue(ActivePlaceHolderColorProperty); }
-        set { SetValue(ActivePlaceHolderColorProperty, value); }
+        get => (string)GetValue(DisplayFormatProperty);
+        set => SetValue(DisplayFormatProperty, value);
     }
-    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(PickerView), Colors.Black, BindingMode.TwoWay);
-    public Color TextColor
+
+    public static readonly BindableProperty Is24HourProperty = BindableProperty.Create(
+        nameof(Is24Hour), typeof(bool), typeof(TimePicker), true, BindingMode.OneWay);
+
+    public bool Is24Hour
     {
-        get { return (Color)GetValue(TextColorProperty); }
-        set { SetValue(TextColorProperty, value); }
+        get => (bool)GetValue(Is24HourProperty);
+        set => SetValue(Is24HourProperty, value);
     }
-    public static readonly BindableProperty PlaceHolderProperty = BindableProperty.Create(nameof(PlaceHolder), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string PlaceHolder
+
+    public static readonly BindableProperty ShowSecondsProperty = BindableProperty.Create(
+        nameof(ShowSeconds), typeof(bool), typeof(TimePicker), false, BindingMode.OneWay,
+        propertyChanged: static (b, _, _) => ((TimePicker)b).UpdateFormattedTime());
+
+    public bool ShowSeconds
     {
-        get { return (string)GetValue(PlaceHolderProperty); }
-        set { SetValue(PlaceHolderProperty, value); }
+        get => (bool)GetValue(ShowSecondsProperty);
+        set => SetValue(ShowSecondsProperty, value);
     }
-    public static readonly BindableProperty ErrorMessageProperty = BindableProperty.Create(nameof(ErrorMessage), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string ErrorMessage
+
+    public static readonly BindableProperty MinuteIntervalProperty = BindableProperty.Create(
+        nameof(MinuteInterval), typeof(int), typeof(TimePicker), 1, BindingMode.OneWay);
+
+    /// <summary>Minute step in the wheel (1, 5, 10, 15, …). Clamped to 1–30.</summary>
+    public int MinuteInterval
     {
-        get { return (string)GetValue(ErrorMessageProperty); }
-        set { SetValue(ErrorMessageProperty, value); }
+        get => (int)GetValue(MinuteIntervalProperty);
+        set => SetValue(MinuteIntervalProperty, value);
     }
-    public static readonly BindableProperty IsValidProperty = BindableProperty.Create(nameof(IsValid), typeof(bool), typeof(PickerView), default(bool), BindingMode.TwoWay);
-    public bool IsValid
+
+    public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+        nameof(Title), typeof(string), typeof(TimePicker), null, BindingMode.OneWay,
+        defaultValueCreator: static _ => PersianToolkitStrings.SelectTime);
+
+    public string Title
     {
-        get { return (bool)GetValue(IsValidProperty); }
-        set { SetValue(IsValidProperty, value); }
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
     }
-    public static readonly BindableProperty IconProperty = BindableProperty.Create(nameof(Icon), typeof(string), typeof(PickerView), default(string), BindingMode.TwoWay);
-    public string Icon
+
+    public static readonly BindableProperty AcceptTextProperty = BindableProperty.Create(
+        nameof(AcceptText), typeof(string), typeof(TimePicker), null, BindingMode.OneWay,
+        defaultValueCreator: static _ => PersianToolkitStrings.Confirm);
+
+    public string AcceptText
     {
-        get { return (string)GetValue(IconProperty); }
-        set { SetValue(IconProperty, value); }
+        get => (string)GetValue(AcceptTextProperty);
+        set => SetValue(AcceptTextProperty, value);
     }
-    #endregion
+
+    public static readonly BindableProperty CancelTextProperty = BindableProperty.Create(
+        nameof(CancelText), typeof(string), typeof(TimePicker), null, BindingMode.OneWay,
+        defaultValueCreator: static _ => PersianToolkitStrings.Cancel);
+
+    public string CancelText
+    {
+        get => (string)GetValue(CancelTextProperty);
+        set => SetValue(CancelTextProperty, value);
+    }
+
+    public static readonly BindableProperty OnTimeChangedCommandProperty = BindableProperty.Create(
+        nameof(OnTimeChangedCommand), typeof(Command), typeof(TimePicker), default(Command));
+
+    public Command OnTimeChangedCommand
+    {
+        get => (Command)GetValue(OnTimeChangedCommandProperty);
+        set => SetValue(OnTimeChangedCommandProperty, value);
+    }
+
+    public static readonly BindableProperty OnOpenedCommandProperty = BindableProperty.Create(
+        nameof(OnOpenedCommand), typeof(Command), typeof(TimePicker), default(Command));
+
+    public Command OnOpenedCommand
+    {
+        get => (Command)GetValue(OnOpenedCommandProperty);
+        set => SetValue(OnOpenedCommandProperty, value);
+    }
+
+    /// <summary>Raised after the user confirms a time in the sheet.</summary>
+    public event EventHandler<TimeSelectedEventArgs>? TimeChanged;
+
     public TimePicker()
     {
         InitializeComponent();
+        AttachInputChrome(outline);
+        AttachGestureRecognizer();
+
+        if (string.IsNullOrEmpty(Icon))
+            Icon = "\uf017";
     }
 
-    //private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
-    //{
-    //var view = new DatePickerView(this.SelectedTime)
-    //{
-    //    SelectDateMode = this.SelectDateMode,
-    //    SelectDateCommand = new Command(async (date) =>
-    //    {
-    //        this.SelectedPersianDate = date.ToString();
-    //        SetFormattedDate();
-    //        await PopupNavigation.Instance.PopAsync();
-    //    })
-    //};
-    //await PopupNavigation.Instance.PushAsync(new Rg.Plugins.Popup.Pages.PopupPage()
-    //{
-    //    CloseWhenBackgroundIsClicked = true,
-    //    Animation = new ScaleAnimation(Rg.Plugins.Popup.Enums.MoveAnimationOptions.Center, Rg.Plugins.Popup.Enums.MoveAnimationOptions.Center)
-    //    {
-    //        DurationIn = 250,
-    //        DurationOut = 250,
-    //        ScaleIn = 1,
-    //        ScaleOut = 1,
-    //    },
-    //    Content = new Frame()
-    //    {
-    //        VerticalOptions = LayoutOptions.Center,
-    //        Padding = new Thickness(0),
-    //        Margin = new Thickness(20),
-    //        HasShadow = true,
-    //        CornerRadius = 0,
-    //        IsClippedToBounds = true,
-    //        BorderColor = Color.Transparent,
-    //        BackgroundColor = ((Color)App.Current.Resources["PrimaryLight"]),
-    //        Content = view
-    //    }
-    //});
-    //}
+    private void AttachGestureRecognizer()
+    {
+        container.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(OnTapped)
+        });
+    }
 
+    private void OnLoaded(object? sender, EventArgs e) =>
+        _ = EnsureSheetReadyAsync();
 
-    #region Event's
+    private Task EnsureSheetReadyAsync()
+    {
+        if (_sheet is not null)
+            return Task.CompletedTask;
 
-    protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        if (_initTask is { IsCompleted: false })
+            return _initTask;
+
+        _initTask = CreateSheetAsync();
+        return _initTask;
+    }
+
+    private Task CreateSheetAsync()
+    {
+        _sheet = new TimePickerView();
+        _sheet.TimeSelected += OnSheetTimeSelected;
+        _sheet.Opened += OnSheetOpened;
+        _sheet.Closed += OnSheetClosed;
+        return Task.CompletedTask;
+    }
+
+    private void OnSheetOpened(object? sender, EventArgs e) =>
+        OnOpenedCommand?.Execute(e);
+
+    private void OnSheetClosed(object? sender, EventArgs e) =>
+        _isShowing = false;
+
+    private void OnSheetTimeSelected(object? sender, TimeSelectedEventArgs e)
+    {
+        _hasUserValue = true;
+        SelectedTime = e.Time;
+        UpdateFormattedTime();
+        TimeChanged?.Invoke(this, e);
+        OnTimeChangedCommand?.Execute(e.Time);
+    }
+
+    private void OnSelectedTimeChanged()
+    {
+        _hasUserValue = true;
+        UpdateFormattedTime();
+    }
+
+    protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         base.OnPropertyChanged(propertyName);
 
-        if (propertyName == IsEnabledProperty.PropertyName)
-            PlaceHolderColor = this.IsEnabled ? PlaceHolderColor : Colors.Gray;
+        if (propertyName == nameof(IsEnabled) && !IsEnabled)
+            PlaceHolderColor = ThemeColors.Disabled;
+    }
 
-        if (propertyName == IconProperty.PropertyName)
+    private void UpdateFormattedTime()
+    {
+        if (!_hasUserValue && SelectedTime == TimeSpan.Zero && string.IsNullOrEmpty(FormattedTime))
         {
-            lblIcon.IsVisible = !string.IsNullOrEmpty(Icon);
+            // Keep empty until the user picks, unless bound SelectedTime was set explicitly later.
+            return;
         }
 
-        if (propertyName == SelectedTimeProperty.PropertyName)
-        {
-            if (SelectedTime.TotalMilliseconds > 0)
-                SetFormattedDate();
+        var format = string.IsNullOrWhiteSpace(DisplayFormat)
+            ? (ShowSeconds ? "HH:mm:ss" : "HH:mm")
+            : DisplayFormat;
 
-            if (string.IsNullOrEmpty(txtEntry.Text))
-                PullDownPlaceHolder();
-            else
-            {
-                SetFormattedDate();
-                PullUpPlaceHolder();
-            }
-        }
+        // Prefer 12-hour tokens when Is24Hour is false and format still uses HH.
+        if (!Is24Hour && format.Contains("HH", StringComparison.Ordinal))
+            format = format.Replace("HH", "hh", StringComparison.Ordinal);
 
-        if (propertyName == WidthProperty.PropertyName)
-        {
-            rectangle.WidthRequest = this.Width;
-            rectangle.Stroke = new SolidColorBrush(Color.FromArgb("#a4a6a9"));
-        }
+        FormattedTime = DateTime.Today.Add(SelectedTime)
+            .ToString(format, CultureInfo.CurrentCulture);
     }
 
-    private void Entry_Focused(object sender, FocusEventArgs e)
+    private async void OnTapped()
     {
-        PullUpPlaceHolder();
-    }
+        if (_isShowing || !IsEnabled)
+            return;
 
-    private void Entry_Unfocused(object sender, FocusEventArgs e)
-    {
-        if (string.IsNullOrEmpty(txtEntry.Text))
-            PullDownPlaceHolder();
-    }
+        _isShowing = true;
 
-    private void txtEntry_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(txtEntry.Text))
-            PullDownPlaceHolder();
-        else
-            PullUpPlaceHolder();
-    }
-
-    #endregion
-
-    #region Method's
-
-    void SetFormattedDate()
-    {
         try
         {
-            FormattedTime = DateTime.Today.Add(SelectedTime).ToString(DisplayFormat, new System.Globalization.CultureInfo("fa-IR")); //.Replace('/', DateSeparator).Split(DateSeparator);
+            await EnsureSheetReadyAsync();
+            if (_sheet is null)
+                return;
+
+            _sheet.Title = Title ?? PersianToolkitStrings.SelectTime;
+            _sheet.AcceptText = AcceptText ?? PersianToolkitStrings.Confirm;
+            _sheet.CancelText = CancelText ?? PersianToolkitStrings.Cancel;
+
+            var seed = _hasUserValue ? SelectedTime : DateTime.Now.TimeOfDay;
+            _sheet.Prepare(seed, Is24Hour, ShowSeconds, MinuteInterval);
+
+            _parentPage ??= FindParentContentPage();
+            if (_parentPage is null)
+                return;
+
+            await _parentPage.ShowPopupAsync(_sheet, new PopupOptions
+            {
+                Shape = null,
+                Shadow = null
+            });
         }
-        catch (Exception)
+        finally
         {
-            //Dialogs.Instance.ShowException(ex);
+            _isShowing = false;
         }
-        //if (dateParts.Length > 0)
-        //    FormattedDate = DisplayFormat.Replace("yyyy", dateParts[0]).Replace("yy", dateParts[0].Substring(1, 2));
-
-        //if (dateParts.Length >= 2)
-        //    FormattedDate = FormattedDate.Replace("MMM", Enum.GetName(typeof(PersianMonthNames), dateParts[1].ToInt() - 1))
-        //        .Replace("MM", dateParts[1]).Replace("M", dateParts[1].ToInt().ToString());
-
-        //if (dateParts.Length >= 3)
-        //    FormattedDate = FormattedDate.Replace("dd", dateParts[2])
-        //        .Replace("d", dateParts[2].ToInt().ToString())
-        //        .Replace("DD", dateParts[2]);
     }
-    void PullUpPlaceHolder()
+
+    private ContentPage? FindParentContentPage()
     {
-        lblPlaceholder.TranslateTo(0, -28);
-        if (PlaceHolderColor != ActivePlaceHolderColor)
-            _color = PlaceHolderColor; //Application.Current.Resources[$"Primary{Application.Current.RequestedTheme}"];
-        if (this.txtEntry.IsFocused)
-        {
-            var activeColor = ((Color)Application.Current.Resources[$"Primary{Application.Current.RequestedTheme}"]);
-            this.PlaceHolderColor = activeColor; //this.ActivePlaceHolderColor;
-            rectangle.Stroke = new SolidColorBrush(activeColor);
-        }
-        else
-        {
-            this.PlaceHolderColor = Color.FromArgb("#a4a6a9");
-            rectangle.Stroke = new SolidColorBrush(Color.FromArgb("#a4a6a9"));
-        }
-        lblPlaceholder.BackgroundColor = Colors.White;
-        //PlaceHolderColor = ActivePlaceHolderColor;
-    }
-    void PullDownPlaceHolder()
-    {
-        lblPlaceholder.TranslateTo(0, 0);
-        ActivePlaceHolderColor = PlaceHolderColor;
-        PlaceHolderColor = _color;
-        if (!this.txtEntry.IsFocused)
-        {
-            rectangle.Stroke = new SolidColorBrush(Color.FromArgb("#a4a6a9"));
-            ActivePlaceHolderColor = Color.FromArgb("#a4a6a9");// PlaceHolderColor;
-            PlaceHolderColor = Color.FromArgb("#a4a6a9");// _color;
-        }
-    }
+        var parent = Parent;
+        while (parent is not null and not ContentPage)
+            parent = parent.Parent;
 
-    #endregion
+        return parent as ContentPage;
+    }
 }

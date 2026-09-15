@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<mpt:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:mpt="http://schemas.mauipersiantoolkit.com/2026/toolkit"
                xmlns:vm="clr-namespace:MauiPersianToolkit.ViewModels"
                xmlns:models="clr-namespace:MauiPersianToolkit.Models"
-               xmlns:mpt="clr-namespace:MauiPersianToolkit.Behaviors"
                x:Class="MauiPersianToolkit.Controls.DatePickerView" x:DataType="vm:DatePickerViewModel"
-               BackgroundColor="Transparent" HorizontalOptions="Fill" x:Name="page">
-    <toolkit:Popup.Resources>
+               BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Center" x:Name="page">
+    <mpt:Popup.Resources>
         <!-- Static platform values — evaluated once at startup, not per item -->
         <OnPlatform x:Key="DayButtonSize" x:TypeArguments="x:Double" Default="36">
             <On Platform="Android" Value="36" />
@@ -27,10 +26,10 @@
         <OnPlatform x:Key="BorderHeight" x:TypeArguments="x:Double" Default="486">
             <On Platform="WinUI" Value="450" />
         </OnPlatform>
-    </toolkit:Popup.Resources>
+    </mpt:Popup.Resources>
 
     <!-- x:Name on root gives DataTemplates a cheap x:Reference instead of AncestorType traversal -->
-    <Border x:Name="RootBorder" Background="White" HorizontalOptions="Center" FlowDirection="RightToLeft"
+    <Border x:Name="RootBorder" Background="{AppThemeBinding Light={StaticResource PdtSurfaceLight}, Dark={StaticResource PdtSurfaceDark}}" HorizontalOptions="Center" FlowDirection="RightToLeft"
             WidthRequest="{StaticResource BorderWidth}"
             HeightRequest="{StaticResource BorderHeight}">
         <Border.StrokeShape>
@@ -55,15 +54,15 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Text="&#xf054;" Margin="0" Command="{Binding PrevMonthCommand}"
-                        TextColor="Black" Padding="5,0" Grid.Column="0" Grid.Row="0"
-                        BackgroundColor="White" FontFamily="FontAwesome" BorderWidth="1"
-                        BorderColor="Gray" FontSize="Micro" HeightRequest="28" WidthRequest="28"
+                        TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" Padding="5,0" Grid.Column="0" Grid.Row="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}" FontFamily="FontAwesome" BorderWidth="1"
+                        BorderColor="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}" FontSize="Micro" HeightRequest="28" WidthRequest="28"
                         VerticalOptions="Center" HorizontalOptions="Start" CornerRadius="7"/>
 
                 <!-- Month selector button -->
                 <Button HorizontalOptions="Fill" Text="{Binding CurrentMonth}" FontSize="12"
-                        TextColor="Black" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0"
-                        BackgroundColor="White" FontFamily="IranianSans" FontAutoScalingEnabled="True"
+                        TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}" FontFamily="IranianSans" FontAutoScalingEnabled="True"
                         Command="{Binding SwitchModeCommand}" CommandParameter="0">
                     <Button.Padding>
                         <OnPlatform Android="7" iOS="10,7" WinUI="5,7"/>
@@ -72,7 +71,7 @@
                         <OnPlatform Android="Left,15" iOS="Left,15" WinUI="Left,10"/>
                     </Button.ContentLayout>
                     <Button.ImageSource>
-                        <FontImageSource Glyph="&#xf078;" FontFamily="FontAwesome" Color="Black" Size="14"/>
+                        <FontImageSource Glyph="&#xf078;" FontFamily="FontAwesome" Color="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" Size="14"/>
                     </Button.ImageSource>
                     <Button.Triggers>
                         <DataTrigger TargetType="Button" Binding="{Binding SelectDateMode}" Value="0">
@@ -82,12 +81,12 @@
                 </Button>
 
                 <!-- Year selector button -->
-                <Button HorizontalOptions="Fill" Text="{Binding CurrentYear}" TextColor="Black"
-                        Padding="10,7" Grid.Column="3" Grid.Row="0" BackgroundColor="White"
+                <Button HorizontalOptions="Fill" Text="{Binding CurrentYear}" TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"
+                        Padding="10,7" Grid.Column="3" Grid.Row="0" BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}"
                         FontFamily="IranianSans" FontAutoScalingEnabled="True" Grid.ColumnSpan="2"
                         Command="{Binding SwitchModeCommand}" CommandParameter="2" ContentLayout="Left,20">
                     <Button.ImageSource>
-                        <FontImageSource Glyph="&#xf078;" FontFamily="FontAwesome" Color="Black" Size="14"/>
+                        <FontImageSource Glyph="&#xf078;" FontFamily="FontAwesome" Color="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" Size="14"/>
                     </Button.ImageSource>
                     <Button.Triggers>
                         <DataTrigger TargetType="Button" Binding="{Binding SelectDateMode}" Value="2">
@@ -97,9 +96,9 @@
                 </Button>
 
                 <Button Text="&#xf053;" Margin="0" Command="{Binding NextMonthCommand}"
-                        TextColor="Black" Padding="5,0" Grid.Column="5" Grid.Row="0"
-                        BackgroundColor="White" FontFamily="FontAwesome" BorderWidth="1"
-                        BorderColor="Gray" FontSize="Micro" HeightRequest="28" WidthRequest="28"
+                        TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" Padding="5,0" Grid.Column="5" Grid.Row="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}" FontFamily="FontAwesome" BorderWidth="1"
+                        BorderColor="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}" FontSize="Micro" HeightRequest="28" WidthRequest="28"
                         VerticalOptions="Center" HorizontalOptions="End" CornerRadius="7"/>
             </Grid>
 
@@ -119,10 +118,10 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:PuiTuple">
-                        <Button Text="{Binding Value}" Margin="0" BackgroundColor="White"
-                                TextColor="#333" FontSize="12" FontFamily="IranianSans"
+                        <Button Text="{Binding Value}" Margin="0" BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" FontSize="12" FontFamily="IranianSans"
                                 HorizontalOptions="Fill"
-                                Command="{Binding BindingContext.SelectMonthCommand,Source={RelativeSource AncestorType={x:Type toolkit:Popup}},x:DataType=toolkit:Popup}"
+                                Command="{Binding BindingContext.SelectMonthCommand,Source={RelativeSource AncestorType={x:Type mpt:Popup}},x:DataType=mpt:Popup}"
                                 CommandParameter="{Binding}"/>
                         <!--Command="{Binding Source={x:Reference RootBorder}, Path=BindingContext.SelectMonthCommand}"-->
                     </DataTemplate>
@@ -145,9 +144,9 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:PuiTuple">
-                        <Button Text="{Binding Value}" Margin="0" BackgroundColor="White"
-                                TextColor="#333" FontSize="15" FontFamily="IranianSans"
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type toolkit:Popup}}, Path=BindingContext.SelectYearCommand,x:DataType=toolkit:Popup}"
+                        <Button Text="{Binding Value}" Margin="0" BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" FontSize="15" FontFamily="IranianSans"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type mpt:Popup}}, Path=BindingContext.SelectYearCommand,x:DataType=mpt:Popup}"
                                 CommandParameter="{Binding}" Padding="2,10" HorizontalOptions="Fill">
                             <!--Command="{Binding Source={x:Reference RootBorder}, Path=BindingContext.SelectYearCommand}"-->
                             <Button.Triggers>
@@ -175,7 +174,7 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
                         <Label FontSize="11" HorizontalOptions="Center" Text="{Binding}"
-                               HeightRequest="36" TextColor="Black" VerticalOptions="Start"
+                               HeightRequest="36" TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}" VerticalOptions="Start"
                                VerticalTextAlignment="Center" WidthRequest="38"
                                HorizontalTextAlignment="Center" FontFamily="IranianSans"/>
                     </DataTemplate>
@@ -209,13 +208,13 @@
                                 <Button.Triggers>
                                     <!-- Default/deselected state -->
                                     <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="False">
-                                        <Setter Property="TextColor" Value="#333"/>
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
                                         <!--<Setter Property="Background" Value="White"/>-->
                                     </DataTrigger>
 
                                     <!-- Disabled day — only the False case needs overriding -->
                                     <DataTrigger TargetType="Button" Binding="{Binding CanSelect}" Value="False">
-                                        <Setter Property="TextColor" Value="#999"/>
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PdtDisabledLight}, Dark={StaticResource PdtDisabledDark}}"/>
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
 
@@ -227,7 +226,7 @@
                     Value="{Binding Source={x:Reference RootBorder}, Path=BindingContext.Options.SelectDayColor, Mode=OneWay, FallbackValue='White'}"/>
                                     </DataTrigger>
                                     <DataTrigger TargetType="Button" Binding="{Binding IsInRange}" Value="False">
-                                        <Setter Property="BackgroundColor" Value="White"/>
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}"/>
                                     </DataTrigger>
 
                                     <!-- Holiday -->
@@ -259,15 +258,15 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <BoxView Grid.Row="8" HeightRequest="1" Color="Gainsboro" HorizontalOptions="Fill" VerticalOptions="Center">
+            <BoxView Grid.Row="8" HeightRequest="1" Color="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}" HorizontalOptions="Fill" VerticalOptions="Center">
                 <BoxView.Behaviors>
                     <mpt:PlatformColumnSpanBehavior Android="7" iOS="7" WinUI="6"/>
                 </BoxView.Behaviors>
             </BoxView>
 
             <!-- ── Today button ── -->
-            <Button Grid.Column="0" Grid.Row="9" Text="امروز" Margin="0,0,0,7"
-                    BackgroundColor="White" FontSize="12" Command="{Binding GotoTodayCommand}" FontFamily="IranianSans"
+            <Button Grid.Column="0" Grid.Row="9" Text="{mpt:Localize Today}" Margin="0,0,0,7"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}" FontSize="12" Command="{Binding GotoTodayCommand}" FontFamily="IranianSans"
                     TextColor="{Binding Options.SelectDayColor}" BorderColor="{Binding Options.SelectDayColor}" BorderWidth="1">
                 <Button.Behaviors>
                     <mpt:PlatformColumnSpanBehavior Android="7" iOS="7" WinUI="6"/>
@@ -276,7 +275,7 @@
 
             <!-- ── Confirm / Cancel buttons (shown when AutoClose is off) ── -->
             <Grid Grid.Column="0" Grid.Row="10" ColumnDefinitions="50*,50*" ColumnSpacing="15"
-                  RowSpacing="10" BackgroundColor="WhiteSmoke" IsVisible="False" RowDefinitions="Auto">
+                  RowSpacing="10" BackgroundColor="{AppThemeBinding Light={StaticResource PdtFooterLight}, Dark={StaticResource PdtFooterDark}}" IsVisible="False" RowDefinitions="Auto">
                 <Grid.Behaviors>
                     <mpt:PlatformColumnSpanBehavior Android="7" iOS="7" WinUI="6"/>
                 </Grid.Behaviors>
@@ -286,21 +285,20 @@
                     </DataTrigger>
                 </Grid.Triggers>
 
-                <Button Text="انصراف" Grid.Column="1" Grid.Row="0" Margin="0"
-                        BackgroundColor="White" BorderColor="Gray" FontSize="12"
+                <Button Text="{mpt:Localize Cancel}" Grid.Column="1" Grid.Row="0" Margin="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PdtDayButtonLight}, Dark={StaticResource PdtDayButtonDark}}" BorderColor="{AppThemeBinding Light={StaticResource PdtOutlineLight}, Dark={StaticResource PdtOutlineDark}}" FontSize="12"
                         x:Name="btnCancel" FontFamily="IranianSans"
                         TextColor="{Binding Options.SelectDayColor}" BorderWidth="1"/>
 
-                <Button Text="تایید" Grid.Row="0" Grid.Column="0" Margin="0"
+                <Button Text="{mpt:Localize Confirm}" Grid.Row="0" Grid.Column="0" Margin="0"
                         BackgroundColor="{Binding Options.SelectDayColor}" FontSize="12"
-                        x:Name="btnAccept" FontFamily="IranianSans" TextColor="White" IsEnabled="True">
+                        x:Name="btnAccept" FontFamily="IranianSans" TextColor="White"
+                        IsEnabled="{Binding CanAccept}">
                     <Button.Triggers>
-                        <DataTrigger TargetType="Button" Binding="{Binding SelectedDays.Count}" Value="0">
-                            <Setter Property="IsEnabled" Value="False"/>
+                        <DataTrigger TargetType="Button" Binding="{Binding CanAccept}" Value="False">
                             <Setter Property="Opacity" Value="0.6"/>
                         </DataTrigger>
-                        <DataTrigger TargetType="Button" Binding="{Binding SelectedDays.Count}" Value="1">
-                            <Setter Property="IsEnabled" Value="True"/>
+                        <DataTrigger TargetType="Button" Binding="{Binding CanAccept}" Value="True">
                             <Setter Property="Opacity" Value="1"/>
                         </DataTrigger>
                     </Button.Triggers>
@@ -308,4 +306,4 @@
             </Grid>
         </Grid>
     </Border>
-</toolkit:Popup>
+</mpt:Popup>

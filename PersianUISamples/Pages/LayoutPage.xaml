@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pui="clr-namespace:MauiPersianToolkit.Controls;assembly=MauiPersianToolkit"
+             xmlns:vm="clr-namespace:PersianUISamples.ViewModels"
+             xmlns:demo="clr-namespace:PersianUISamples.Controls"
+             x:Class="PersianUISamples.Pages.LayoutPage"
+             x:DataType="vm:LayoutGalleryViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView Style="{StaticResource DemoScroll}">
+        <VerticalStackLayout>
+            <Label Text="{Binding PageTitle}" Style="{StaticResource DemoPageTitle}"/>
+            <Label Text="{Binding PageLead}" Style="{StaticResource DemoPageLead}"/>
+
+            <demo:DemoSection Title="TabView" Hint="{Binding TabHint}">
+                <pui:TabView SelectedTabColor="{StaticResource PdtAccent}"
+                             IndicatorColor="{StaticResource PdtAccent}"
+                             UnSelectedTabColor="#9AA0A6"
+                             SelectedTab="0"
+                             AnimateCaptions="True"
+                             EnableAnimations="True"
+                             HeightRequest="220">
+                    <pui:TabView.ItemsSource>
+                        <pui:TabItemView Title="{Binding Tab1}" Icon="&#xf015;" Padding="12">
+                            <Label Text="{Binding Tab1Content}" FontFamily="IranianSans"
+                                   TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                        </pui:TabItemView>
+                        <pui:TabItemView Title="{Binding Tab2}" Icon="&#xf1b2;" Padding="12">
+                            <Label Text="{Binding Tab2Content}" FontFamily="IranianSans"
+                                   TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                        </pui:TabItemView>
+                        <pui:TabItemView Title="{Binding Tab3}" Icon="&#xf005;" Padding="12">
+                            <Label Text="{Binding Tab3Content}" FontFamily="IranianSans"
+                                   TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                        </pui:TabItemView>
+                    </pui:TabView.ItemsSource>
+                </pui:TabView>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="ContainerView" Hint="{Binding ContainerHint}">
+                <pui:ContainerView Title="{Binding ContainerTitle}" LeftTitle="{Binding ContainerLeft}">
+                    <pui:ContainerView.Contents>
+                        <Label Text="{Binding ContainerBody}" FontFamily="IranianSans" Padding="8"
+                               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                    </pui:ContainerView.Contents>
+                </pui:ContainerView>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="Expander" Hint="{Binding ExpanderHint}">
+                <pui:Expander IsExpanded="False">
+                    <pui:Expander.Header>
+                        <Label Text="{Binding ExpanderHeader}" FontFamily="IranianSans" Padding="8"
+                               TextColor="{AppThemeBinding Light={StaticResource PdtOnSurfaceLight}, Dark={StaticResource PdtOnSurfaceDark}}"/>
+                    </pui:Expander.Header>
+                    <Label Text="{Binding ExpanderBody}" FontFamily="IranianSans" Padding="12,4"
+                           TextColor="{AppThemeBinding Light={StaticResource PdtMutedLight}, Dark={StaticResource PdtMutedDark}}"/>
+                </pui:Expander>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="CircleImageView" Hint="{Binding CircleHint}">
+                <pui:CircleImageView ImageSource="dotnet_bot.svg"
+                                     ImageHeight="96" ImageWidth="96"
+                                     BorderThickness="2"
+                                     BorderColor="{StaticResource PdtAccent}"
+                                     HorizontalOptions="Center"/>
+            </demo:DemoSection>
+
+            <demo:DemoSection Title="SlideButton" Hint="{Binding SlideHint}">
+                <pui:SlideButton HeightRequest="48"
+                                 SlideCompletedCommand="{Binding SlideDoneCommand}"
+                                 FlowDirection="LeftToRight">
+                    <pui:SlideButton.Thumb>
+                        <Border StrokeThickness="1" Stroke="LimeGreen" BackgroundColor="White"
+                                Padding="5" HeightRequest="46" WidthRequest="46">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="7"/>
+                            </Border.StrokeShape>
+                            <Label Text="&#xf090;" FontFamily="FontAwesome" FontSize="24"
+                                   TextColor="LimeGreen"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                    </pui:SlideButton.Thumb>
+                    <pui:SlideButton.TrackBar>
+                        <Border StrokeThickness="0" BackgroundColor="#DDDDDD" HeightRequest="48">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding SlideTrack}" FontFamily="IranianSans" FontSize="15"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                    </pui:SlideButton.TrackBar>
+                    <pui:SlideButton.FillBar>
+                        <Border StrokeThickness="0" BackgroundColor="#E8F5E9" HeightRequest="48">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                        </Border>
+                    </pui:SlideButton.FillBar>
+                </pui:SlideButton>
+            </demo:DemoSection>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
